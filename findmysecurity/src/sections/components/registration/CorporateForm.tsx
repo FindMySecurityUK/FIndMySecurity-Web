@@ -5,7 +5,7 @@ import { FaBuilding, FaCheck, FaClipboardList, FaEnvelope, FaGlobe, FaIndustry, 
 import { LockIcon } from "lucide-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import Select from "react-select";
-import MembershipDialog from "./MembershipDialog";
+// import MembershipDialog from "./MembershipDialog";
 import TextField from '@mui/material/TextField';
 import professionalsList from "@/sections/data/secuirty_professional.json";
 import toast from "react-hot-toast";
@@ -41,7 +41,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [showAllErrors, setShowAllErrors] = useState(false);
-  const [showMembershipDialog, setShowMembershipDialog] = useState(false);
+  // const [showMembershipDialog, setShowMembershipDialog] = useState(false);
   const [formSubmissionData, setFormSubmissionData] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -55,7 +55,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
     password: "",
     jobTitle: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     website: "",
     selectedRoles: [] as string[], 
     otherService: "",
@@ -67,7 +67,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
   });
 
   const validatePhoneNumber = (phone: string) => {
-    if (!phone.trim()) {
+    if (!phone?.trim()) {
       return { isValid: false, error: "Phone number is required" };
     }
 
@@ -160,11 +160,11 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
       isValid = false;
     }
 
-    if (!formData.phone.trim()) {
-      errors.phone = "Phone number is required";
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = "Phone number is required";
       isValid = false;
     } else if (!phoneNumberInfo.isValid) {
-      errors.phone = phoneNumberInfo.error || "Invalid phone number";
+      errors.phoneNumber = phoneNumberInfo.error || "Invalid phone number";
       isValid = false;
     }
 
@@ -310,7 +310,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     password: formData.password,
     firstName: formData.companyName.split(" ")[0],
     lastName: formData.companyName.split(" ")[1] || "",
-    phoneNumber: formData.phone,
+    phoneNumber: formData.phoneNumber,
     companyData: {
       companyName: formData.companyName,
       registrationNumber: formData.registrationNumber,
@@ -319,7 +319,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       postCode: formData.postcode,
       contactPerson: formData.contactPerson,
       jobTitle: formData.jobTitle,
-      phoneNumber: formData.phone,
+      phoneNumber: formData.phoneNumber,
       website: formData.website,
     },
     serviceRequirements: formData.selectedRoles,
@@ -335,7 +335,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   setFormSubmissionData(formattedData);
-  setShowMembershipDialog(true);
+  // setShowMembershipDialog(true);
 };
 
 
@@ -347,7 +347,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     };
     
     // Close the dialog and submit the form with the selected plan
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -357,7 +357,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       ...formSubmissionData,
       // membershipPlan: 'basic'
     };
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -790,40 +790,41 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="relative flex items-center">
         <FaPhone className="absolute left-3 top-3 text-gray-500" />
         <TextField
-          type="text"
-          name="phoneNumber"
-          value={formData.phone}
-          onChange={handlePhoneNumberChange}
-          id="outlined-basic"
-          variant="outlined"
-          label="Phone Number"
-          className={`w-full pl-10 pr-3 py-2 border rounded-md bg-gray-100 focus:ring-2 focus:ring-black ${
-            showAllErrors && formErrors.phoneNumber ? "border-red-500" : "border-gray-300"
-          } focus:border-black`}
-          InputLabelProps={{
-            style: { color: 'gray' },
-          }}
-          inputProps={{
-            className: "focus:outline-none"
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: showAllErrors && formErrors.phoneNumber ? "red" : "gray",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "black",
-              },
-            },
-            "& .MuiInputLabel-root": {
-              color: "gray",
-            },
-            "& .Mui-focused .MuiInputLabel-root": {
-              color: "black",
-            },
-          }}
-        />
-        {(formData.phone && phoneNumberInfo.country) && (
+  type="text"
+  name="phoneNumber"
+  value={formData.phoneNumber}
+  onChange={handlePhoneNumberChange}
+  id="outlined-basic"
+  variant="outlined"
+  label="Phone Number"
+  className={`w-full pl-10 pr-3 py-2 border rounded-md bg-gray-100 focus:ring-2 focus:ring-black ${
+    showAllErrors && formErrors.phoneNumber ? "border-red-500" : "border-gray-300"
+  } focus:border-black`}
+  InputLabelProps={{
+    style: { color: 'gray' },
+  }}
+  inputProps={{
+    className: "focus:outline-none"
+  }}
+  sx={{
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: showAllErrors && formErrors.phoneNumber ? "red" : "gray",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "black",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: "gray",
+    },
+    "& .Mui-focused .MuiInputLabel-root": {
+      color: "black",
+    },
+  }}
+/>
+
+        {(formData.phoneNumber && phoneNumberInfo.country) && (
           <div className="mt-1 text-xs text-gray-500">
             Country: {phoneNumberInfo.country}
             {phoneNumberInfo.formatInternational && (
@@ -1110,11 +1111,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             <FaCheck className="inline mr-2" /> Submit
           </button>
         </form>
-        <MembershipDialog 
+        {/* <MembershipDialog 
         isOpen={showMembershipDialog}
         onClose={handleDialogClose}
         onPlanSelected={handlePlanSelected}
-      />
+      /> */}
       </div>
       </>
   );

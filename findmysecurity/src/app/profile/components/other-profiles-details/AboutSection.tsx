@@ -56,7 +56,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ profile, roleId, userId }) 
       }
 
       const payload = {
-        ...profile,
+        // ...profile,
         ...formData,
       };
 

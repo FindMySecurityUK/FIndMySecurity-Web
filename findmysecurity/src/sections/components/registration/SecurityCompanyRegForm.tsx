@@ -5,7 +5,7 @@ import { FaBuilding, FaCheck, FaClipboardList, FaEnvelope, FaGlobe, FaIndustry, 
 import { LockIcon } from "lucide-react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import Select from "react-select";
-import MembershipDialog from "./MembershipDialog";
+// import MembershipDialog from "./MembershipDialog";
 import TextField from '@mui/material/TextField';
 import companiesList from "@/sections/data/secuirty_services.json";
 import providersList from "@/sections/data/training_providers.json";
@@ -70,7 +70,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [showAllErrors, setShowAllErrors] = useState(false);
-  const [showMembershipDialog, setShowMembershipDialog] = useState(false);
+  // const [showMembershipDialog, setShowMembershipDialog] = useState(false);
   const [formSubmissionData, setFormSubmissionData] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -343,7 +343,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
     };
 
     setFormSubmissionData(formattedData);
-    setShowMembershipDialog(true);
+    // setShowMembershipDialog(true);
   };
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -371,7 +371,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
       ...formSubmissionData,
       membershipPlan: plan
     };
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -380,7 +380,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
       ...formSubmissionData,
       membershipPlan: 'basic'
     };
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -1131,11 +1131,11 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
             <FaCheck className="inline mr-2" /> Submit
           </button>
         </form>
-        <MembershipDialog 
+        {/* <MembershipDialog 
         isOpen={showMembershipDialog}
         onClose={handleDialogClose}
         onPlanSelected={handlePlanSelected}
-      />
+      /> */}
       </div>
     </>
   );

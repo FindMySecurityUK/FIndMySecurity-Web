@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { LockIcon } from "lucide-react";
 import { FaEnvelope, FaMapMarkerAlt, FaUser, FaPhone } from "react-icons/fa";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import MembershipDialog from "./MembershipDialog"; // Adjust the import path as needed
+// import MembershipDialog from "./MembershipDialog"; // Adjust the import path as needed
 import TextField from '@mui/material/TextField';
 import toast from "react-hot-toast";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
@@ -29,7 +29,7 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [showAllErrors, setShowAllErrors] = useState(false);
-  const [showMembershipDialog, setShowMembershipDialog] = useState(false);
+  // const [showMembershipDialog, setShowMembershipDialog] = useState(false);
   const [formSubmissionData, setFormSubmissionData] = useState<any>(null);
   const [phoneNumberInfo, setPhoneNumberInfo] = useState<{
     isValid: boolean;
@@ -271,7 +271,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   setFormSubmissionData(submissionData);
-  setShowMembershipDialog(true);
+  // setShowMembershipDialog(true);
 };
 
 
@@ -283,7 +283,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     };
     
     // Close the dialog and submit the form with the selected plan
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -293,7 +293,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       ...formSubmissionData,
       // membershipPlan: 'basic'
     };
-    setShowMembershipDialog(false);
+    // setShowMembershipDialog(false);
     onSubmit(finalData);
   };
 
@@ -778,11 +778,11 @@ const handleSubmit = async (e: React.FormEvent) => {
   </button>
 </form>
 
-      <MembershipDialog 
+      {/* <MembershipDialog 
         isOpen={showMembershipDialog}
         onClose={handleDialogClose}
         onPlanSelected={handlePlanSelected}
-      />
+      /> */}
     </div>
   );
 };

@@ -397,7 +397,7 @@ const DocumentApplicantsPage = () => {
         </div>
       )}
 
-      {requests.length > 0 && (
+      {/* {requests.length > 0 && (
         <div className="text-center mt-10">
           <button
             onClick={handleClearAll}
@@ -407,7 +407,7 @@ const DocumentApplicantsPage = () => {
             {isClearing ? "Clearing..." : "Clear All Requests"}
           </button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
