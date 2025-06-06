@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const SuccessTips: React.FC = () => {
   return (
@@ -136,7 +137,8 @@ const SuccessTips: React.FC = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Stay Safe</h2>
         <p className="text-gray-700">
           Your safety is our priority. Always use the platform’s secure messaging system, never share passwords, and follow our{' '}
-          <a href="#" className="text-blue-600 hover:underline">Safety Centre</a> guidance.
+          <Link href="/help/safety-centre" className="text-blue-600 hover:underline"> Safety Centre </Link>
+          guidance.
         </p>
       </section>
 
@@ -144,7 +146,7 @@ const SuccessTips: React.FC = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Need Help?</h2>
         <p className="text-gray-700">
           Our team is here to support you 365 days a year. If you need assistance with any aspect of your profile or account, get in touch at{' '}
-          <a href="mailto:support@findmysecurity.co.uk" className="text-blue-600 hover:underline">support@findmysecurity.co.uk</a>, we’ll respond promptly.
+          <a href="mailto:info@findmysecurity.co.uk" className="text-blue-600 hover:underline">info@findmysecurity.co.uk</a>, we’ll respond promptly.
         </p>
       </section>
     </div>
