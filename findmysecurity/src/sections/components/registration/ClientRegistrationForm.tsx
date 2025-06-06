@@ -213,6 +213,10 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
       isValid = false;
     }
 
+    if(!formData.terms) {
+      errors.terms = "Terms and Conditions are required";
+      isValid = false;
+    }
     setFormErrors(errors);
     return isValid && Object.keys(errors).length === 0;
   };

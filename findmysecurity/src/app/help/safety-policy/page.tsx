@@ -112,7 +112,7 @@ const AntiDiscriminationPolicy: React.FC = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">6. Reporting and Handling Complaints</h2>
         <p className="text-gray-700 mb-2">
           Users can report concerns or violations by contacting our support team at{' '}
-          <a href="mailto:support@findmysecurity.co.uk" className="text-blue-600 hover:underline">support@findmysecurity.co.uk</a>. All reports will be handled confidentially and investigated promptly.
+          <a href="mailto:info@findmysecurity.co.uk" className="text-blue-600 hover:underline">info@findmysecurity.co.uk</a>. All reports will be handled confidentially and investigated promptly.
         </p>
       </section>
 
