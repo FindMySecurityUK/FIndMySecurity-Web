@@ -462,7 +462,7 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
     profileHeadline: profileData?.profileHeadline,
     gender: profileData?.gender,
     hourlyRate: profileData?.hourlyRate,
-    location: profileData?.postcode,
+    location: profileData?.postcode?.split(" ")[0],
   };
   
   const aboutMe = {
