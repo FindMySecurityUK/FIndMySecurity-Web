@@ -335,6 +335,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   setFormSubmissionData(formattedData);
+  onSubmit(formattedData);
   // setShowMembershipDialog(true);
 };
 

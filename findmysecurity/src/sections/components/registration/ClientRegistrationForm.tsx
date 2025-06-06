@@ -271,6 +271,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   setFormSubmissionData(submissionData);
+  onSubmit(submissionData);
   // setShowMembershipDialog(true);
 };
 

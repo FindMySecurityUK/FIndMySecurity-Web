@@ -343,6 +343,7 @@ const SecurityCompanyForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSu
     };
 
     setFormSubmissionData(formattedData);
+    onSubmit(formattedData);
     // setShowMembershipDialog(true);
   };
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
