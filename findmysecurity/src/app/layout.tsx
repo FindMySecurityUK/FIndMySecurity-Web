@@ -15,10 +15,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ToastProvider />
-        <Navbar />
+        {/* <Navbar /> */}
         <main>{children}</main>
         
-        {/* Floating Chatbot Button */}
+        {/* Floating Chatbot Button
         {usePathname() !== '/chatbot-ui' && (
           <Link 
             href="/chatbot-ui"
@@ -35,10 +35,10 @@ export default function RootLayout({
               AI Assistant
             </div>
           </Link>
-        )}
+        )} */}
 
         <footer className="bg-black text-white text-center py-3">
-          <Footer />
+          {/* <Footer /> */}
         </footer>
       </body>
     </html>
