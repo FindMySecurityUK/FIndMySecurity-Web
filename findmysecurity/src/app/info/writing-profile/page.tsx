@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const ProfileTips: React.FC = () => {
   return (
@@ -140,7 +141,7 @@ const ProfileTips: React.FC = () => {
           </p>
           <p className="text-gray-700 mt-2">
             For more advice on safe hiring and professional conduct, please visit our{' '}
-            <a href="#" className="text-blue-600 hover:underline">Safety Centre</a>.
+            <Link href="/help/safety-centre" className="text-blue-600 hover:underline"> Safety Centre </Link>
           </p>
         </div>
       </section>
