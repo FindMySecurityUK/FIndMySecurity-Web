@@ -150,7 +150,7 @@ export default function Navbar() {
           <MobileDynamicDropdown jsonFile="secuirty_professional.json" title="Security Professionals" basePath="/professionals/" />
           <MobileDynamicDropdown jsonFile="secuirty_services.json" title="Security Services" basePath="/services/" />
           <MobileDynamicDropdown jsonFile="training_providers.json" title="Training Providers" basePath="/providers/" />
-          <Link href="/insurance" className="block ml-4 py-2 hover:text-gray-300">
+          <Link href="https://insyncinsurance.co.uk/findmysecurity-ltd/" className="block ml-4 py-2 hover:text-gray-300">
             Insurance Cover
           </Link>
           <MobileResourcesDropdown />
