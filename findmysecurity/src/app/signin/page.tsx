@@ -34,7 +34,12 @@ const SignIn = () => {
       if(data?.needed2FA){
        setShow2FA(true);
       toast.success(` Check your email for 2FA code`);
-      }else{
+      }else if (data?.needsValidation)
+        {
+          toast.error(`Please verify your email first`);
+          router.push('/verify');
+      }
+        else{
         localStorage.setItem("loginData", JSON.stringify(data));
         localStorage.setItem("authToken", JSON.stringify(data.token)); 
         toast.success(`Login Success`);

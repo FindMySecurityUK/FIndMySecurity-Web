@@ -33,7 +33,7 @@ const PostAdLister: React.FC = () => {
   const [applyingJobs, setApplyingJobs] = useState<{[key: number]: boolean}>({});
 
   const handleApplyClick = async (job: any) => {
-    if (job.source === 'local' || job.source === 'Find My Security') {
+    if ((job.source === 'local' || job.source === 'Find My Security')&& (job.link===''||job.link===null)) {
       setApplyingJobs(prev => ({ ...prev, [job.id]: true }));
       try {
         await applyForJob(job.id);
@@ -41,7 +41,7 @@ const PostAdLister: React.FC = () => {
         setApplyingJobs(prev => ({ ...prev, [job.id]: false }));
       }
     } else {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
+      window.open(job.url? job.url:job.link, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -103,7 +103,7 @@ const PostAdLister: React.FC = () => {
     const currentId = data?.id || data?.user?.id;
 
     try {
-      const res = await axios.get(`${API_URL}/security-jobs?keyword=${keyword}&location=${location}&minSalary=${rateFilter}`, {
+      const res = await axios.get(`${API_URL}/security-jobs?keyword=${keyword}&location=${location}&minSalary=${rateFilter? rateFilter : 0}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -162,11 +162,12 @@ const PostAdLister: React.FC = () => {
     setSearched(true);
     setLoading(true);
     try {
-      const [adzunaRes, monsterRes,reedRes, securityRes] = await Promise.all([
-        fetch(`/api/reed-job?keyword=${keyword}&location=${location}&minSalary=${rateFilter}`),
-        fetch(`/api/monster-job?keyword=${keyword}&location=${location}&minSalary=${rateFilter}`),
-        fetch(`/api/reed?keyword=${keyword}&location=${location}&minSalary=${rateFilter}`),
-        fetchSecurityJobs(),
+      const [ securityRes, adzunaRes, monsterRes,reedRes] = await Promise.all([
+         fetchSecurityJobs(),
+        fetch(`/api/reed-job?keyword=${keyword}&location=${location}&minSalary=${rateFilter? rateFilter : 0}`),
+        fetch(`/api/monster-job?keyword=${keyword}&location=${location}&minSalary=${rateFilter? rateFilter : 0}`),
+        fetch(`/api/reed?keyword=${keyword}&location=${location}&minSalary=${rateFilter? rateFilter : 0}`),
+       
       ]);
 
       const [adzunaData, monsterData, reedData] = await Promise.all([
@@ -198,7 +199,7 @@ const PostAdLister: React.FC = () => {
 
   const mergedJobs = [
     ...securityJobs.map((j) => ({ ...j, source: "Find My Security" })),
-    ...localJobs.map((j) => ({ ...j, source: "local" })),
+   
     ...adzunaJobs.map((j) => ({ ...j, source: "adzuna" })),
     ...monsterJobs.map((j) => ({ ...j, source: "monster" })),
     ...reedJobs.map((j) => ({ ...j, source: "reed" })),
@@ -309,7 +310,7 @@ const PostAdLister: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  {post.source === 'local' || post.source === 'Find My Security' ? (
+                  {(post.source === 'local' || post.source === 'Find My Security') && (post.link===''||post.link===null) ? (
                     <div className="flex flex-col items-end gap-2">
                       <div className="flex space-x-2">
                         <button

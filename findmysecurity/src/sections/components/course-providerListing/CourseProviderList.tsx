@@ -100,6 +100,10 @@ const validatePostcode = async (postcode: string) => {
   }
 };
   const handleFilterChange = (updatedParams: Record<string, string>) => {
+    if (updatedParams.pc !== undefined) {
+      setPc(updatedParams.pc);
+      setDistance("");
+    }
     if (updatedParams.sr !== undefined) {
       setSelectedCategory(updatedParams.sr);
       setSelectedRole("");
@@ -174,14 +178,26 @@ const validatePostcode = async (postcode: string) => {
 
           {showAdvanced && (
             <>
-              <input
-                type="text"
-                placeholder="Distance"
+              <select
                 value={distance}
-                onChange={(e) => handleFilterChange({ distance: e.target.value })}
-                className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black text-black"
-              />
-
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "Nationwide") {
+                    handleFilterChange({ distance: value, pc: "" });
+                  } else {
+                    handleFilterChange({ distance: value });
+                  }
+                }}
+                className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black text-black bg-white"
+                disabled={!pc}
+              >
+              <option value="">Select Distance</option>
+              <option value="5">Up to 5 miles</option>
+              <option value="10">10 miles</option>
+              <option value="20">20 miles</option>
+              <option value="50">50 miles</option>
+              <option value="Nationwide">Nationwide</option>
+              </select>
             </>
           )}
         </div>

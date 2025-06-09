@@ -91,7 +91,7 @@ export default function RegistrationSelector() {
       localStorage.setItem("profileData", JSON.stringify(response.data));
 
       toast.success("User registered successfully. Please verify your email.");
-      setShowVerificationModal(true);
+      router.push('/verify')
     } catch (error: unknown) {
       console.error("Registration error:", error);
 
