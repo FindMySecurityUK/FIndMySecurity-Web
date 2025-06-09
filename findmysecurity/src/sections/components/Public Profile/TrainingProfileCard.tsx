@@ -271,7 +271,7 @@ const TrainingProfileCard: React.FC<{ provider: Provider }> = ({ provider }) => 
 
       <ProfileGroup title="Training Services Offered" data={{ services: servicesRequirements }} />
       <ProfileGroup title="Security Services Offered" data={{ services: securityServicesOfferings }} />
-      <ProfileGroup title="Permissions" data={permissions} />
+      {/* <ProfileGroup title="Permissions" data={permissions} /> */}
       <ProfileGroup
         title="Primary Contact"
         data={{

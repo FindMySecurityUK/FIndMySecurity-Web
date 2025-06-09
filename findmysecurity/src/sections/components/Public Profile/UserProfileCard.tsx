@@ -553,114 +553,109 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
   const targetUserId = user.id || 38;
   
   return (
-    <div className="max-w-5xl mx-auto my-10 px-6 bg-white rounded-lg shadow p-6">
-      <div className="flex flex-col items-left text-left bg-white rounded-lg shadow p-6">
-        <div className="flex flex-row">
-          <div className="relative w-fit">
-            <div
-              className={`w-36 h-36 rounded-full p-1 ${
-                isSubscriber
-                  ? subscriptionTier === "Premium"
-                    ? "bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-500"
-                    : subscriptionTier === "Standard"
-                    ? "bg-gradient-to-tr from-gray-300 via-gray-200 to-gray-400"
-                    : "bg-green-500"
-                  : ""
-              }`}
-            >
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-white p-[2px]">
-                <img
-                  src={profilePhoto || img.src}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              </div>
-            </div>
-            <div className="flex -mt-3 flex-col items-center">
-              {isSubscriber && (
-                <div className="bg-white rounded-full p-1 shadow-md border border-gray-300">
-                  <span className="text-green-600 text-xs font-bold">Subscriber {subscriptionTier}</span>
-                </div>
-              )}
-              {documents && documents.length > 0 && <ProfessionalIcons />}
-            </div>
-          </div>
-          <div className="mx-6 my-4">
-            <h2 className="text-2xl font-bold text-gray-800">{firstName} {lastName}</h2>
-            <p className="text-gray-600">{role}</p>
-            {profileData?.basicInfo?.profileHeadline && (
-              <p className="text-gray-500 text-sm mt-1">
-                {profileData.basicInfo.profileHeadline}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row mt-6 gap-3">
-              <Section
-                label="Chat on Whatsapp"
-                value={phoneNumber}
-                onClick={() => window.open(`https://wa.me/${phoneNumber?.replace(/[^\d]/g, '')}`, "_blank")}
-                clickable
-                hiddenValue
-                showIcon
-              />
-              <Section
-                label="Mobile"
-                value={phoneNumber}
-                onClick={() => window.location.href = `tel:${phoneNumber}`}
-                clickable
-                hiddenValue
-                showIcon
-              />
-              <Section
-                label="Message"
-                value={email}
-                onClick={() => window.location.href = `mailto:${email}`}
-                clickable
-                hiddenValue
-                showIcon
-              />
-            </div>
+<div className="max-w-5xl mx-auto my-6 px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow">
+  <div className="flex flex-col text-left bg-white rounded-lg shadow p-4 sm:p-6">
+    <div className="flex flex-col sm:flex-row sm:items-start">
+      <div className="relative w-fit mx-auto sm:mx-0">
+        <div
+          className={`w-24 h-24 sm:w-36 sm:h-36 rounded-full p-1 ${
+            isSubscriber
+              ? subscriptionTier === "Premium"
+                ? "bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-500"
+                : subscriptionTier === "Standard"
+                ? "bg-gradient-to-tr from-gray-300 via-gray-200 to-gray-400"
+                : "bg-green-500"
+              : ""
+          }`}
+        >
+          <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white p-[2px]">
+            <img
+              src={profilePhoto || img.src}
+              alt="Profile"
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
         </div>
+        <div className="flex flex-col items-center -mt-3">
+          {isSubscriber && (
+            <div className="bg-white rounded-full p-1 shadow-md border border-gray-300">
+              <span className="text-green-600 text-xs sm:text-sm font-bold">Subscriber {subscriptionTier}</span>
+            </div>
+          )}
+          {documents && documents.length > 0 && <ProfessionalIcons />}
+        </div>
       </div>
-      {role != "IndividualProfessional" && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-10 mt-10 bg-white rounded-lg shadow p-6">
-        <Section label="Date of Birth" value={dateOfBirth} />
-        <Section label="Address" value={address} />
-        {postcode && <Section label="Postcode" value={postcode} />}
-        {screenName && <Section label="Screen Name" value={profileData?.screenName || screenName} />}
-      </div>
-      )}
-
-      <ProfileGroup title="Basic Info" data={basicInfo} />
-      <ProfileGroup title="About" data={aboutMe} />
-      <ProfileGroup title="Fees" data={fee} />
-      <ProfileGroup title="Contact Info" data={contactInfo} />
-      <ProfileGroup title="Services" data={services} />
-      {profileData?.weeklySchedule ? (
-        <div className="mt-10 bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Availability</h3>
-          <p className="text-sm text-gray-600 mb-2">
-            {profileData.availabilityDescription || "Weekly schedule:"}
+      <div className="mx-0 sm:mx-6 my-4 text-center sm:text-left">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{firstName} {lastName}</h2>
+        <p className="text-gray-600 text-sm sm:text-base">{role}</p>
+        {profileData?.basicInfo?.profileHeadline && (
+          <p className="text-gray-500 text-xs sm:text-sm mt-1">
+            {profileData.basicInfo.profileHeadline}
           </p>
-          <AvailabilityTable schedule={profileData.weeklySchedule} />
+        )}
+        <div className="flex flex-col sm:flex-row mt-4 sm:mt-6 gap-2 sm:gap-3">
+          <Section
+            label="Chat on Whatsapp"
+            value={phoneNumber}
+            onClick={() => window.open(`https://wa.me/${phoneNumber?.replace(/[^\d]/g, '')}`, "_blank")}
+            clickable
+            hiddenValue
+            showIcon
+          />
+          <Section
+            label="Mobile"
+            value={phoneNumber}
+            onClick={() => window.location.href = `tel:${phoneNumber}`}
+            clickable
+            hiddenValue
+            showIcon
+          />
+          <Section
+            label="Message"
+            value={email}
+            onClick={() => window.location.href = `mailto:${email}`}
+            clickable
+            hiddenValue
+            showIcon
+          />
         </div>
-      ) : (
-        <div className="mt-10 bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 shadow-sm">
-          No professional profile available.
-        </div>
-      )}
-      {documents && documents.length > 0 ? (
-        <DocumentsSection documents={documents} userId={userId} targetUserId={targetUserId} />
-      ) : (
-        <div className="mt-10 bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 shadow-sm">
-          No documents available.
-        </div>
-      )}
-      {/* <ProfileGroup
-        title="Permissions"
-        data={user?.individualProfessional?.permissions || user?.permissions}
-      /> */}
+      </div>
     </div>
+  </div>
+  {role !== "IndividualProfessional" && (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-10 bg-white rounded-lg shadow p-4 sm:p-6">
+      <Section label="Date of Birth" value={dateOfBirth} />
+      <Section label="Address" value={address} />
+      {postcode && <Section label="Postcode" value={postcode} />}
+      {screenName && <Section label="Screen Name" value={profileData?.screenName || screenName} />}
+    </div>
+  )}
+  <ProfileGroup title="Basic Info" data={basicInfo} />
+  <ProfileGroup title="About" data={aboutMe} />
+  <ProfileGroup title="Fees" data={fee} />
+  <ProfileGroup title="Contact Info" data={contactInfo} />
+  <ProfileGroup title="Services" data={services} />
+  {profileData?.weeklySchedule ? (
+    <div className="mt-6 sm:mt-10 bg-white rounded-lg shadow p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Availability</h3>
+      <p className="text-xs sm:text-sm text-gray-600 mb-2">
+        {profileData.availabilityDescription || "Weekly schedule:"}
+      </p>
+      <AvailabilityTable schedule={profileData.weeklySchedule} />
+    </div>
+  ) : (
+    <div className="mt-6 sm:mt-10 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 text-center text-gray-500 text-sm sm:text-base shadow-sm">
+      No professional profile available.
+    </div>
+  )}
+  {documents && documents.length > 0 ? (
+    <DocumentsSection documents={documents} userId={userId} targetUserId={targetUserId} />
+  ) : (
+    <div className="mt-6 sm:mt-10 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 text-center text-gray-500 text-sm sm:text-base shadow-sm">
+      No documents available.
+    </div>
+  )}
+</div>
   );
 };
 
