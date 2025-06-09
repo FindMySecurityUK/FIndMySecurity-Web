@@ -234,6 +234,8 @@ const CourseListPage = () => {
           <option value="1 month">1 month</option>
           <option value="3 months">3 months</option>
           <option value="6 months">6 months</option>
+          <option value="1 year">1 year</option>
+
         </select>
       </div>
 
