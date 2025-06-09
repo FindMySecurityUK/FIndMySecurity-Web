@@ -15,11 +15,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ToastProvider />
-        <Navbar />
+        {/* <Navbar /> */}
         <main>{children}</main>
         
         
-        {usePathname() !== '/chatbot-ui' && (
+        {/* {usePathname() !== '/chatbot-ui' && (
           <Link 
             href="/chatbot-ui"
             className="fixed bottom-16 right-6 w-16 h-16 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 z-50 group"
@@ -35,10 +35,10 @@ export default function RootLayout({
               AI Assistant
             </div>
           </Link>
-        )}
+        )} */}
 
         <footer className="bg-black text-white text-center py-3">
-          <Footer />
+          {/* <Footer /> */}
         </footer>
       </body>
     </html>

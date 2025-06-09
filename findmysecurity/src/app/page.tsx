@@ -13,17 +13,17 @@ import ComingSoon from '@/sections/components/coming soon/comingsoon'
 export default function Home() {
   return (
     <div>
-    <Hero/>
+    {/* <Hero/>
     <TrustedCompanies/>
     <SecurityCompanies/>
-    <GetStarted/>
+    <GetStarted/> */}
     {/* <SecurityAppSection/> */}
-    <TrainingProviders/> 
-     <Testimonials/>
+    {/* <TrainingProviders/> 
+     <Testimonials/> */}
     {/* <BusinessSection/> */}
     {/* <StepsSection/> */}
     {/* <SecurityFeatures/> */}
-    {/* <ComingSoon/> */}
+    <ComingSoon/>
 
     </div>
 
