@@ -298,10 +298,10 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
       dateOfBirth: formattedDateOfBirth,
       address: formData.address,
       postcode: formData.postcode,
-      serviceRequirements: formData.selectedRoles,
-      securityServicesOfferings: formData.otherService 
-        ? [formData.otherService.trim()]
-        : [],
+      // serviceRequirements: formData.selectedRoles,
+      // securityServicesOfferings: formData.otherService 
+      //   ? [formData.otherService.trim()]
+      //   : [],
       permissions: {
         premiumServiceNeed: formData.premiumService,
         acceptEmails: formData.receiveEmails,
@@ -329,8 +329,8 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-md text-black">
-      <h1 className="text-center text-2xl font-bold my-6">
+    <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-md text-black">
+      <h1 className="text-center text-3xl font-bold my-6">
         {title} Registration
       </h1>
 
@@ -377,83 +377,64 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
           )}
         </div>
 
-        <div className="relative flex items-center">
-          <LockIcon className="absolute left-3 top-3 text-gray-700" />
-          <TextField
-            type={passwordVisible ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            id="outlined-basic"
-            variant="outlined"
-            label="Password"
-            className={`w-full pl-10 pr-3 py-2 border rounded-md bg-gray-100 focus:ring-2 focus:ring-black ${
-              showAllErrors && formErrors.password ? "border-red-500" : "border-gray-300"
-            } focus:border-black`}
-            InputLabelProps={{
-              style: { color: 'gray' },
-            }}
-            inputProps={{
-              className: "focus:outline-none"
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: showAllErrors && formErrors.password ? "red" : "gray",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "black",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "gray",
-              },
-              "& .Mui-focused .MuiInputLabel-root": {
-                color: "black",
-              },
-            }}
-          />
-          <button
-            type="button"
-            className="absolute right-3 top-4 text-gray-500"
-            onClick={() => setPasswordVisible(!passwordVisible)}
-          >
-            {passwordVisible ? <IoMdEyeOff className="w-6 h-6" /> : <IoMdEye className="w-6 h-6"/>}
-          </button>
-          {(formData.password || showAllErrors) && (
-            <div className="mt-2 text-xs space-y-1">
-              {(!passwordValidations.length || showAllErrors) && (
-                <p className={passwordValidations.length ? "text-green-500" : "text-red-500"}>
-                  {passwordValidations.length ? "✓" : "✗"} At least 8 characters
-                </p>
-              )}
-              {(!passwordValidations.hasUpper || showAllErrors) && (
-                <p className={passwordValidations.hasUpper ? "text-green-500" : "text-red-500"}>
-                  {passwordValidations.hasUpper ? "✓" : "✗"} At least one capital letter
-                </p>
-              )}
-              {(!passwordValidations.hasLower || showAllErrors) && (
-                <p className={passwordValidations.hasLower ? "text-green-500" : "text-red-500"}>
-                  {passwordValidations.hasLower ? "✓" : "✗"} At least one small letter
-                </p>
-              )}
-              {(!passwordValidations.hasNumber || showAllErrors) && (
-                <p className={passwordValidations.hasNumber ? "text-green-500" : "text-red-500"}>
-                  {passwordValidations.hasNumber ? "✓" : "✗"} At least one number
-                </p>
-              )}
-              {(!passwordValidations.hasSpecial || showAllErrors) && (
-                <p className={passwordValidations.hasSpecial ? "text-green-500" : "text-red-500"}>
-                  {passwordValidations.hasSpecial ? "✓" : "✗"} At least one special character (. - _ ! @ # $ % ^ *)
-                </p>
-              )}
-            </div>
-          )}
-          {(showAllErrors && formErrors.password) && (
-            <p className="mt-1 text-xs text-red-500">{formErrors.password}</p>
-          )}
-        </div>
+             <div className="relative">
+     <LockIcon className="absolute left-3 top-3 text-gray-500" />
+     <TextField
+       type={passwordVisible ? "text" : "password"}
+       name="password"
+       value={formData.password}
+       onChange={handleChange}
+       required
+       label="Password"
+       id="outlined-basic"
+       variant="outlined"
+       className={`w-full pl-10 pr-3 py-2 border rounded-md bg-gray-100 focus:ring-2 focus:ring-black ${
+         showAllErrors && formErrors.password ? "border-red-500" : "border-gray-300"
+       } focus:border-black`}
+       InputLabelProps={{ style: { color: 'gray' } }}
+       inputProps={{ className: "focus:outline-none" }}
+       sx={{
+         "& .MuiOutlinedInput-root": {
+           "& fieldset": {
+             borderColor: showAllErrors && formErrors.password ? "red" : "gray",
+           },
+           "&.Mui-focused fieldset": { borderColor: "black" },
+         },
+         "& .MuiInputLabel-root": { color: "gray" },
+         "& .Mui-focused .MuiInputLabel-root": { color: "black" },
+       }}
+     />
+     <button
+       type="button"
+       className="absolute right-3 top-4 text-gray-500"
+       onClick={() => setPasswordVisible(!passwordVisible)}
+     >
+       {passwordVisible ? <IoMdEyeOff className="w-6 h-6" /> : <IoMdEye className="w-6 h-6" />}
+     </button>
+   
+     {(formData.password || showAllErrors) && !passwordValidations.isValid && (
+       <div className="mt-2 text-xs space-y-1">
+         {!passwordValidations.length && (
+           <p className="text-red-500">✗ At least 8 characters</p>
+         )}
+         {!passwordValidations.hasUpper && (
+           <p className="text-red-500">✗ At least one capital letter</p>
+         )}
+         {!passwordValidations.hasLower && (
+           <p className="text-red-500">✗ At least one small letter</p>
+         )}
+         {!passwordValidations.hasNumber && (
+           <p className="text-red-500">✗ At least one number</p>
+         )}
+         {!passwordValidations.hasSpecial && (
+           <p className="text-red-500">✗ At least one special character (. - _ ! @ # $ % ^ *)</p>
+         )}
+       </div>
+     )}
+     {(showAllErrors && formErrors.password) && (
+       <p className="mt-1 text-xs text-red-500">{formErrors.password}</p>
+     )}
+   </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative flex items-center">
@@ -736,9 +717,8 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
             )}
           </div>
         </div>
-        {roleid === 3 && (
+        {/* {roleid === 3 && (
         <>
-          {/* Security Services */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Security Services*
@@ -871,7 +851,6 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
             )}
           </div>
 
-          {/* Other Services */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Other Services:</label>
             <input
@@ -883,7 +862,7 @@ const ClientGeneralForm: React.FC<ClientGeneralFormProps> = ({ id, title, onSubm
             />
           </div>
         </>
-      )}
+      )} */}
         
 
         <div className="flex items-center space-x-3">
