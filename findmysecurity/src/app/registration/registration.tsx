@@ -175,7 +175,7 @@ const ClientGeneralForm = () => {
         </div>
 
         {/* Submit Button */}
-        <button disabled={!formData.acceptTerms} type="submit" className="w-full py-3 bg-black text-white font-bold rounded-md hover:bg-blue-700">
+        <button type="submit" className="w-full py-3 bg-black text-white font-bold rounded-md hover:bg-blue-700">
           Join now for free
         </button>
       </form>
