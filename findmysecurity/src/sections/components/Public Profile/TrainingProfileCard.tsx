@@ -209,79 +209,152 @@ const TrainingProfileCard: React.FC<{ provider: Provider }> = ({ provider }) => 
   } = courseProvider;
 
   return (
-    <div className="max-w-5xl mx-auto my-10 px-4 sm:px-6 bg-white rounded-lg shadow-lg p-6">
-      <div className="flex flex-col sm:flex-row items-start gap-6 bg-white rounded-lg p-6">
-        <div className="flex-shrink-0">
-          <img
-            src={profile?.profilePhoto || '/images/training.jpg'}
-            alt={`${companyName} logo`}
-            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border border-gray-200"
+    <div className="max-w-5xl mx-auto my-6 px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow">
+    <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 bg-white rounded-lg p-4 sm:p-6">
+      <div className="flex-shrink-0 mx-auto sm:mx-0">
+        <img
+          src={profile?.profilePhoto || '/images/training.jpg'}
+          alt={`${companyName} logo`}
+          className="w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover border border-gray-200"
+        />
+      </div>
+      <div className="flex-1 text-center sm:text-left">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{companyName}</h2>
+        <p className="text-gray-600 mt-2 text-sm sm:text-base">{jobTitle || "Training Provider"}</p>
+        <div className="flex flex-col sm:flex-row mt-4 sm:mt-6 gap-2 sm:gap-3">
+          <Section
+            label="Chat on Whatsapp"
+            value={phoneNumber}
+            showIcon
+            clickable
+            hiddenValue
+            onClick={() =>
+              phoneNumber && window.open(`https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}`, "_blank")
+            }
+          />
+          <Section
+            label="Phone"
+            value={phoneNumber}
+            showIcon
+            clickable
+            hiddenValue
+            onClick={() => phoneNumber && window.open(`tel:${phoneNumber}`)}
+          />
+          <Section
+            label="Email"
+            value={user?.email || "N/A"}
+            showIcon
+            clickable
+            hiddenValue
+            onClick={() => user?.email && window.open(`mailto:${user.email}`)}
           />
         </div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-800">{companyName}</h2>
-          <p className="text-gray-600 mt-2">{jobTitle || "Training Provider"}</p>
-          <div className="flex flex-col sm:flex-row mt-6 gap-3">
-            <Section
-              label="Chat on Whatsapp"
-              value={phoneNumber}
-              showIcon
-              clickable
-              hiddenValue
-              onClick={() =>
-                phoneNumber && window.open(`https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}`, "_blank")
-              }
-            />
-            <Section
-              label="Phone"
-              value={phoneNumber}
-              showIcon
-              clickable
-              hiddenValue
-              onClick={() => phoneNumber && window.open(`tel:${phoneNumber}`)}
-            />
-            <Section
-              label="Email"
-              value={user?.email || "N/A"}
-              showIcon
-              clickable
-              hiddenValue
-              onClick={() => user?.email && window.open(`mailto:${user.email}`)}
-            />
-          </div>
-        </div>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 bg-white rounded-lg p-6 shadow-sm">
-        <Section label="Contact Person" value={contactPerson} />
-        <Section label="Job Title" value={jobTitle} />
-        <Section label="Address" value={address} />
-        <Section label="Post Code" value={postCode} />
-        <Section label="Registration Number" value={registrationNumber} />
-        <Section
-          label="Website"
-          value={website || "N/A"}
-          showIcon
-          clickable={!!website && website !== "nil"}
-          hiddenValue
-          onClick={() => website && website !== "nil" && window.open(website, "_blank")}
-        />
-        <Section label="Account Created" value={new Date(createdAt).toLocaleString()} />
-      </div>
-
-      <ProfileGroup title="Training Services Offered" data={{ services: servicesRequirements }} />
-      <ProfileGroup title="Security Services Offered" data={{ services: securityServicesOfferings }} />
-      {/* <ProfileGroup title="Permissions" data={permissions} /> */}
-      <ProfileGroup
-        title="Primary Contact"
-        data={{
-          firstName: user?.firstName || "N/A",
-          lastName: user?.lastName || "N/A",
-          email: user?.email || "N/A",
-          phoneNumber: user?.phoneNumber || "N/A",
-        }}
-      />
     </div>
+  
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8 bg-white rounded-md p-4 sm:p-6 shadow-sm">
+      <Section label="Contact Person" value={contactPerson} />
+      <Section label="Job Title" value={jobTitle} />
+      <Section label="Address" value={address} />
+      <Section label="Postcode" value={postCode} />
+      <Section label="Registration Number" value={registrationNumber} />
+      <Section
+        label="Website"
+        value={website || "N/A"}
+        showIcon
+        clickable={!!website && website !== "nil"}
+        hiddenValue
+        onClick={() => website && website !== "nil" && window.open(website, "_blank")}
+
+      />
+      <Section label="Account Created" value={new Date(createdAt).toLocaleString()} />
+    </div>
+  
+    <ProfileGroup title="Training Services Offered" data={{ services: servicesRequirements }} />
+    <ProfileGroup title="Security Services Offered" data={{ services: securityServicesOfferings }} />
+    <ProfileGroup
+      title="Primary Contact"
+      data={{
+        firstName: contactPerson || "N/A",
+        lastName: user?.lastName || "N/A",
+        email: user?.email || "N/A",
+        phoneNumber: phoneNumber || "N/A",
+      }}
+    />
+  </div>
+    // <div className="max-w-5xl mx-auto my-10 px-4 sm:px-6 bg-white rounded-lg shadow-lg p-6">
+    //   <div className="flex flex-col sm:flex-row items-start gap-6 bg-white rounded-lg p-6">
+    //     <div className="flex-shrink-0">
+    //       <img
+    //         src={profile?.profilePhoto || '/images/training.jpg'}
+    //         alt={`${companyName} logo`}
+    //         className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border border-gray-200"
+    //       />
+    //     </div>
+    //     <div className="flex-1">
+    //       <h2 className="text-2xl font-bold text-gray-800">{companyName}</h2>
+    //       <p className="text-gray-600 mt-2">{jobTitle || "Training Provider"}</p>
+    //       <div className="flex flex-col sm:flex-row mt-6 gap-3">
+    //         <Section
+    //           label="Chat on Whatsapp"
+    //           value={phoneNumber}
+    //           showIcon
+    //           clickable
+    //           hiddenValue
+    //           onClick={() =>
+    //             phoneNumber && window.open(`https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}`, "_blank")
+    //           }
+    //         />
+    //         <Section
+    //           label="Phone"
+    //           value={phoneNumber}
+    //           showIcon
+    //           clickable
+    //           hiddenValue
+    //           onClick={() => phoneNumber && window.open(`tel:${phoneNumber}`)}
+    //         />
+    //         <Section
+    //           label="Email"
+    //           value={user?.email || "N/A"}
+    //           showIcon
+    //           clickable
+    //           hiddenValue
+    //           onClick={() => user?.email && window.open(`mailto:${user.email}`)}
+    //         />
+    //       </div>
+    //     </div>
+    //   </div>
+
+    //   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 bg-white rounded-lg p-6 shadow-sm">
+    //     <Section label="Contact Person" value={contactPerson} />
+    //     <Section label="Job Title" value={jobTitle} />
+    //     <Section label="Address" value={address} />
+    //     <Section label="Post Code" value={postCode} />
+    //     <Section label="Registration Number" value={registrationNumber} />
+    //     <Section
+    //       label="Website"
+    //       value={website || "N/A"}
+    //       showIcon
+    //       clickable={!!website && website !== "nil"}
+    //       hiddenValue
+          // onClick={() => website && website !== "nil" && window.open(website, "_blank")}
+    //     />
+    //     <Section label="Account Created" value={new Date(createdAt).toLocaleString()} />
+    //   </div>
+
+    //   <ProfileGroup title="Training Services Offered" data={{ services: servicesRequirements }} />
+    //   <ProfileGroup title="Security Services Offered" data={{ services: securityServicesOfferings }} />
+    //   {/* <ProfileGroup title="Permissions" data={permissions} /> */}
+    //   <ProfileGroup
+    //     title="Primary Contact"
+    //     data={{
+    //       firstName: user?.firstName || "N/A",
+    //       lastName: user?.lastName || "N/A",
+    //       email: user?.email || "N/A",
+    //       phoneNumber: user?.phoneNumber || "N/A",
+    //     }}
+    //   />
+    // </div>
   );
 };
 
