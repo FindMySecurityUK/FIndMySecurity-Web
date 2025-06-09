@@ -89,8 +89,25 @@ const Section = ({
     </div>
   );
 };
-
 const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
+  // Helper function to detect if a value is a URL
+  const isURL = (value: string): boolean => {
+    try {
+      const urlPattern = /^(https?:\/\/[^\s/$.?#].[^\s]*)$/i;
+      return urlPattern.test(value);
+    } catch {
+      return false;
+    }
+  };
+
+  // Format key for display (e.g., camelCase to Title Case)
+  const formatKey = (key: string): string => {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
   const validEntries = Object.entries(data || {}).filter(
     ([, val]) =>
       val !== null &&
@@ -98,7 +115,9 @@ const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
       val !== undefined &&
       (typeof val !== "object" || (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0))
   );
+
   if (validEntries.length === 0) return null;
+
   return (
     <div className="mt-8 bg-gray-50 rounded-xl border p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">{title}</h3>
@@ -107,17 +126,57 @@ const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
           typeof val === "object" && !Array.isArray(val) && val !== null ? (
             <ProfileGroup key={key} title={formatKey(key)} data={val} />
           ) : (
-            <Section
-              key={key}
-              label={formatKey(key)}
-              value={Array.isArray(val) ? val.join(", ") : val?.toString()}
-            />
+            <div key={key} className="flex flex-col">
+              <span className="text-sm font-medium text-gray-600">{formatKey(key)}</span>
+              {typeof val === "string" && isURL(val) ? (
+                <a
+                  href={val}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  {val}
+                </a>
+              ) : (
+                <span className="text-gray-800">
+                  {Array.isArray(val) ? val.join(", ") : String(val)}
+                </span>
+              )}
+            </div>
           )
         )}
       </div>
     </div>
   );
 };
+// const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
+//   const validEntries = Object.entries(data || {}).filter(
+//     ([, val]) =>
+//       val !== null &&
+//       val !== "" &&
+//       val !== undefined &&
+//       (typeof val !== "object" || (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0))
+//   );
+//   if (validEntries.length === 0) return null;
+//   return (
+//     <div className="mt-8 bg-gray-50 rounded-xl border p-6 shadow-sm">
+//       <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">{title}</h3>
+//       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//         {validEntries.map(([key, val]) =>
+//           typeof val === "object" && !Array.isArray(val) && val !== null ? (
+//             <ProfileGroup key={key} title={formatKey(key)} data={val} />
+//           ) : (
+//             <Section
+//               key={key}
+//               label={formatKey(key)}
+//               value={Array.isArray(val) ? val.join(", ") : val?.toString()}
+//             />
+//           )
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 
 const formatKey = (key: string) =>
   key
@@ -487,7 +546,7 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
     serviceRequirements: profileData?.serviceRequirements,
   };
   
-  const profilePhoto = user?.individualProfessional?.profile?.profilePhoto;
+  const profilePhoto = user?.profile;
   const documents = user?.individualProfessional?.documents || [];
   const currentUser = localStorage.getItem("loginData");
   const userId = currentUser ? JSON.parse(currentUser).id : null;
@@ -597,10 +656,10 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
           No documents available.
         </div>
       )}
-      <ProfileGroup
+      {/* <ProfileGroup
         title="Permissions"
         data={user?.individualProfessional?.permissions || user?.permissions}
-      />
+      /> */}
     </div>
   );
 };
