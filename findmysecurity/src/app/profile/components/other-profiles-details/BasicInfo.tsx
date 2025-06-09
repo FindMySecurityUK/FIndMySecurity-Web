@@ -59,7 +59,18 @@ const BasicInfo: React.FC<Props> = ({ profile, roleId, userId }) => {
           return;
       }
 
-      const payload = { ...formData };
+      let payload = {}
+      if(roleId===7){
+        payload = {
+          ...profile,
+          ...formData,
+        };
+      }
+      else if(roleId===6 || roleId===5){
+        payload = {
+          ...formData,
+        };
+      }
 
       await axios.put(endpoint, payload, {
         headers: {

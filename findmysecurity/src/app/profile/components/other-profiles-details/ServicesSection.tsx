@@ -191,8 +191,20 @@ const ServicesSection = ({ profile, userId, roleId }: Props) => {
           toast.error("Unknown role type.");
           return;
       }
+      let payload = {}
+      if(roleId===7){
+        payload = {
+          ...profile,
+          ...payloadData,
+        };
+      }
+      else if(roleId===6 || roleId===5){
+        payload = {
+          ...payloadData,
+        };
+      }
 
-      await axios.put(endpoint, payloadData, {
+      await axios.put(endpoint, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

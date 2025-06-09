@@ -122,8 +122,19 @@ const ContactSection: React.FC<Props> = ({ profile, roleId, userId }) => {
           setIsSaving(false);
           return;
       }
-
-      await axios.put(endpoint, formData, {
+      let payload = {}
+      if(roleId===7){
+        payload = {
+          ...profile,
+          ...formData,
+        };
+      }
+      else if(roleId===6 || roleId===5){
+        payload = {
+          ...formData,
+        };
+      }
+      await axios.put(endpoint, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
