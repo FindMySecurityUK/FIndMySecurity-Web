@@ -89,13 +89,6 @@ const EmergencyCover: React.FC = () => {
           You’ll be surprised how many security professionals are available for short-notice cover, even in your immediate area.
         </p>
       </section>
-
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Find Emergency Security Cover</h2>
-        <p className="text-gray-700">
-          <a href="#" className="text-blue-600 hover:underline">▶ Post Your Emergency Cover Job</a>
-        </p>
-      </section>
     </div>
   );
 };

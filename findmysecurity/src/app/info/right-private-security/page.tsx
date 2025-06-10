@@ -27,9 +27,6 @@ const SecurityOfficerGuide: React.FC = () => {
           <li>Concierge services at luxury venues</li>
           <li>Residential or estate monitoring</li>
         </ul>
-        <p className="text-gray-700 mt-2">
-          <a href="#" className="text-blue-600 hover:underline">▶ Post a Security Job Now</a>
-        </p>
       </section>
 
       <section className="mb-8">
@@ -98,10 +95,6 @@ const SecurityOfficerGuide: React.FC = () => {
           <li>Officers with positive client reviews</li>
           <li>Professionals ranked by responsiveness and reliability</li>
         </ul>
-        <p className="text-gray-700 mt-2">
-          <a href="#" className="text-blue-600 hover:underline">▶ Search Local Security Officers Now</a>
-        </p>
-        <p className="text-gray-700 mt-2">Or post a tailored job describing exactly what you need.</p>
       </section>
 
       <section className="mb-8">

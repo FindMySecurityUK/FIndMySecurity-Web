@@ -21,7 +21,7 @@ const VerificationGuide: React.FC = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-2">SIA Licence & Insurance</h3>
           <p className="text-gray-700 mb-2">
             All frontline security professionals in the UK must hold a valid Security Industry Authority (SIA) licence appropriate to their role (e.g., Door Supervisor, Close Protection, CCTV Operator). This can be verified on the official{' '}
-            <a href="https://www.sia.homeoffice.gov.uk" className="text-blue-600 hover:underline">SIA Register</a>.
+            <a href="https://services.sia.homeoffice.gov.uk/rolh" className="text-blue-600 hover:underline">SIA Register</a>.
           </p>
           <p className="text-gray-700">
             In addition, self-employed professionals and private security companies must hold up-to-date public liability insurance. Always request proof of this insurance before contracting a service.

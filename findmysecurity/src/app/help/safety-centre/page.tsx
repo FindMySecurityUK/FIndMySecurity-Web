@@ -11,9 +11,6 @@ const SafetyCentre: React.FC = () => {
           At FindMySecurity, your safety is our top priority. We are committed to creating a secure environment for all users, whether you are a security professional, company, trainer, or client. We remind all clients and businesses that we do not personally verify every professional or organisation at the point of registration. Similarly, security professionals are advised to exercise caution when meeting new clients or employers, and never attend a site without basic vetting, communication, or agreed credentials in place.
         </p>
         <p className="text-gray-700 mb-2">
-          <a href="#" className="text-blue-600 hover:underline">Learn more about Checks & Verifications</a>
-        </p>
-        <p className="text-gray-700 mb-2">
           The internet poses inherent risks, and we take online safety extremely seriously. Please remember that profile information may be accessible to the public and, in some cases, indexed by search engines. We strongly advise users to be mindful of how much personal or sensitive information they choose to share.
         </p>
         <p className="text-gray-700 mb-2">
@@ -234,7 +231,7 @@ const SafetyCentre: React.FC = () => {
         </p>
         <p className="text-gray-700 mb-2">
           For general concerns, you can reach our support team directly via{' '}
-          <a href="mailto:support@findmysecurity.co.uk" className="text-blue-600 hover:underline">support@findmysecurity.co.uk</a>.
+          <a href="mailto:info@findmysecurity.co.uk" className="text-blue-600 hover:underline">info@findmysecurity.co.uk</a>.
         </p>
       </section>
     </div>
