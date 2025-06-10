@@ -37,7 +37,7 @@ interface FormData {
   availability: string;
   qualifications: string;
   hourlyRate: string;
-  profilePhoto: File | null;
+  // profilePhoto: File | null;
   homeTelephone: string;
   mobileTelephone: string;
   website: string;
@@ -135,7 +135,7 @@ const JobPosting: React.FC = () => {
       availability: "",
       qualifications: "",
       hourlyRate: null,
-      profilePhoto: null,
+      // profilePhoto: null,
       homeTelephone: "",
       mobileTelephone: "",
       website: "",
@@ -179,16 +179,16 @@ const JobPosting: React.FC = () => {
     }
   };
 
-  const handleProfilePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleInputChange('profilePhoto', e.target.files[0]);
-    }
-  };
+  // const handleProfilePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     handleInputChange('profilePhoto', e.target.files[0]);
+  //   }
+  // };
 
  
-  const removeProfilePhoto = () => {
-    handleInputChange('profilePhoto', null);
-  };
+  // const removeProfilePhoto = () => {
+  //   handleInputChange('profilePhoto', null);
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,7 +268,7 @@ const response = await axios.put(
   // Access the parsed result directly
   const result = response.data;
   safeLocalStorageSet("loginData", JSON.stringify(result?.user));
-
+  toast.success("Profile updated successfully!");
   await new Promise((resolve) => setTimeout(resolve, 2000));
   setShowModal(true);
 
@@ -764,7 +764,7 @@ const response = await axios.put(
 
   
        {/* Profile Photo Section - Updated */}
-       <div className="border-t border-gray-200 pt-6">
+       {/* <div className="border-t border-gray-200 pt-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Photo</h2>
         <p className="text-sm text-gray-600 mb-4">
           Your photo must be of yourself or your setting only. No children or logos.
@@ -805,7 +805,7 @@ const response = await axios.put(
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
         {/* Direct Contact Details Section */}
         <div className="border-t border-gray-200 pt-6">
