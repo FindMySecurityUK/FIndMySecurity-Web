@@ -45,7 +45,7 @@ const page = () => {
               <button
                 onClick={async () => {
                   try {
-                    const loginData = JSON.parse(localStorage.getItem("email") || "{}");
+                    const loginData = JSON.parse(localStorage.getItem("email") || localStorage.getItem("loginData")||"{}");
                     const email = loginData;
                     if (!email) {
                       toast.error("Email not found. Please try registering again.");

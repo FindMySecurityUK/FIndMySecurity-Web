@@ -87,6 +87,7 @@ export default function RegistrationSelector() {
         router.push("/signin");
         return;
       }
+      localStorage.setItem('email', JSON.stringify(response.data.email));
 
       localStorage.setItem("loginData", JSON.stringify(response.data));
       localStorage.setItem("profileData", JSON.stringify(response.data));
