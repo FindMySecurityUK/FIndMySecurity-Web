@@ -19,7 +19,7 @@ export default function Home() {
     <GetStarted/>
     {/* <SecurityAppSection/> */}
     <TrainingProviders/> 
-     <Testimonials/>
+     {/* <Testimonials/> */}
     {/* <BusinessSection/> */}
     {/* <StepsSection/> */}
     {/* <SecurityFeatures/> */}
