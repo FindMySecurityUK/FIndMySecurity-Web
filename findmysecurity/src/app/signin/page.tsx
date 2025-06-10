@@ -37,6 +37,7 @@ const SignIn = () => {
       }else if (data?.needsValidation)
         {
           toast.error(`Please verify your email first`);
+          localStorage.setItem('email',email);
           router.push('/verify');
       }
         else{
