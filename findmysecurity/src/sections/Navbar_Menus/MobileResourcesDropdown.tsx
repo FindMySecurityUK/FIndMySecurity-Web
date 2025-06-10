@@ -8,7 +8,7 @@ const whatWeDo = [
   { title: "Who We Are", id: "who-we-are", link: "/who-we-are" },
   { title: "What we do", id: "what-we-do", link: "/what-we-do" },
   { title: "Contact US ", id: "contact-us ", link: "/contact-us" },
-  { title: "Customer Service", id: "customers-service", link: "/customers-service" },
+  { title: "AI Chatbot", id: "chatbot", link: "/chatbot-ui" },
 ];
 
 const MobileResourcesDropdown = () => {
