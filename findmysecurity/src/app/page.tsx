@@ -8,6 +8,7 @@ import SecurityFeatures from '@/sections/home/SecurityFeatures'
 import StepsSection from '@/sections/home/StepSection'
 import Testimonials from '@/sections/home/Testimonials'
 import TrainingProviders from '@/sections/home/TrainingProviders'
+import ComingSoon from '@/sections/components/coming soon/comingsoon'
 
 export default function Home() {
   return (
@@ -17,11 +18,12 @@ export default function Home() {
     <SecurityCompanies/>
     <GetStarted/>
     {/* <SecurityAppSection/> */}
-    <TrainingProviders/>
-    <Testimonials/>
+    <TrainingProviders/> 
+     <Testimonials/>
     {/* <BusinessSection/> */}
     {/* <StepsSection/> */}
     {/* <SecurityFeatures/> */}
+    {/* <ComingSoon/> */}
 
     </div>
 

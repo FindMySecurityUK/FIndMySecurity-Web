@@ -532,9 +532,9 @@ if (isSubscriber && tier !== 'Basic') {
             {loginData?.role?.name ?? loginData?.role ?? "Security Officer"}
           </p>
             )}
-          <span className="text-sm text-yellow-500">
-            ✅ Usually responds within 1 hour
-          </span>
+          {/* <span className="text-sm text-yellow-500"> */}
+            {/* ✅ Usually responds within 1 hour */}
+          {/* </span> */}
         </div>
       </div>
 

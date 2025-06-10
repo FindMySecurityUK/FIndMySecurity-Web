@@ -18,7 +18,7 @@ export default function RootLayout({
         <Navbar />
         <main>{children}</main>
         
-        {/* Floating Chatbot Button */}
+        
         {usePathname() !== '/chatbot-ui' && (
           <Link 
             href="/chatbot-ui"

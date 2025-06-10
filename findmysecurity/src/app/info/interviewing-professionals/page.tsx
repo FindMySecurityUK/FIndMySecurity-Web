@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+
 
 const InterviewGuide: React.FC = () => {
   return (
@@ -85,9 +87,8 @@ const InterviewGuide: React.FC = () => {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">For more guidance</h2>
         <p className="text-gray-700">
-          See our{' '}
-          <a href="#" className="text-blue-600 hover:underline">Checks and References</a> section or visit the{' '}
-          <a href="#" className="text-blue-600 hover:underline">FindMySecurity Safety Centre</a> for employer best practices.
+          See our Checks and References section or visit the{' '}
+          <Link href="/help/safety-centre" className="text-blue-600 hover:underline"> FindMySecurity Safety Centre </Link> for employer best practices.
         </p>
       </section>
     </div>

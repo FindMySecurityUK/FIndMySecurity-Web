@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+
 
 const VerificationGuide: React.FC = () => {
   return (
@@ -226,8 +228,8 @@ const VerificationGuide: React.FC = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">More Advice on Staying Safe</h2>
         <p className="text-gray-700">
           For further guidance, please visit our{' '}
-          <a href="#" className="text-blue-600 hover:underline">Safety Centre</a>, which contains essential tips on staying safe while using our platform. Or contact us for any further guidance at{' '}
-          <a href="mailto:support@findmysecurity.co.uk" className="text-blue-600 hover:underline">support@findmysecurity.co.uk</a>.
+          <Link href="/help/safety-centre" className="text-blue-600 hover:underline"> Safety Centre </Link>, which contains essential tips on staying safe while using our platform. Or contact us for any further guidance at{' '}
+          <a href="mailto:info@findmysecurity.co.uk" className="text-blue-600 hover:underline">info@findmysecurity.co.uk</a>.
         </p>
       </section>
     </div>
