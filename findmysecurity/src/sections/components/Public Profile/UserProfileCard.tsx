@@ -14,6 +14,7 @@ import {
   AiFillFileText,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
+import { API_URL } from "@/utils/path";
 
 interface SectionProps {
   label: string;
@@ -279,7 +280,7 @@ const DocumentsSection = ({
     try {
       setLoadingUrls((prev) => ({ ...prev, [docId]: true }));
       const response = await fetch(
-        `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/file/file-url?fileName=${encodeURIComponent(fileName)}`
+        `${API_URL}/file/file-url?fileName=${encodeURIComponent(fileName)}`
       );
       if (!response.ok) throw new Error(`Failed to fetch URL for ${fileName}`);
       const data = await response.json();
@@ -319,7 +320,7 @@ const DocumentsSection = ({
   const checkDocumentAccess = async () => {
     try {
       const response = await fetch(
-        `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
+        `${API_URL}/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
       );
       const result = await response.json();
       if (response.ok && result.hasAccess) {
@@ -338,7 +339,7 @@ const DocumentsSection = ({
     setError(null);
     try {
       const response = await fetch(
-        "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+        "${API_URL}/document/request",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -867,7 +868,7 @@ export default UserProfileCard;
 //   const checkDocumentAccess = async () => {
 //     try {
 //       const response = await fetch(
-//         `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
+//         `${API_URL}/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
 //       );
 //       if (response.ok) {
 //         const result = await response.json();
@@ -893,7 +894,7 @@ export default UserProfileCard;
 //     }
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1285,7 +1286,7 @@ export default UserProfileCard;
 
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1671,7 +1672,7 @@ export default UserProfileCard;
 
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1873,7 +1874,7 @@ export default UserProfileCard;
 // //     }
 
 // //     try {
-// //       const response = await fetch("https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request", {
+// //       const response = await fetch("${API_URL}/document/request", {
 // //         method: "POST",
 // //         headers: { "Content-Type": "application/json" },
 // //         body: JSON.stringify({

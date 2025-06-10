@@ -12,6 +12,7 @@ import {
   Loader2
 } from "lucide-react";
 import Link from "next/link";
+import { API_URL } from "@/utils/path";
 
 interface CreatedBy {
   id: number;
@@ -109,8 +110,15 @@ const CourseListPage = () => {
       if (filters.startDate) params.append("startDate", filters.startDate);
       if (filters.duration) params.append("duration", filters.duration);
 
-      const url = `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course/course-ads?${params.toString()}`;
-      const res = await fetch(url);
+      const url = `${API_URL}/course/course-ads?${params.toString()}`;
+      const token = localStorage.getItem('authToken')?.replace(/^"|"$/g, "");
+      const res = await fetch(url, {
+        method: "GET",
+       headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // Add Bearer token here
+    },
+    });
 
       if (!res.ok) throw new Error("Failed to fetch courses");
 
@@ -134,9 +142,13 @@ const CourseListPage = () => {
     setApplyingId(courseId);
 
     try {
-      const response = await fetch("https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course-applications", {
+       const token = localStorage.getItem('authToken')?.replace(/^"|"$/g, "");
+      const response = await fetch(`${API_URL}/course-applications`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+       headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // Add Bearer token here
+    },
         body: JSON.stringify({
           userId: Number(currentId),
           postedBy: postedBy,

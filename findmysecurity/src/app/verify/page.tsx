@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 import { useRouter } from "next/navigation";
 import { Dialog } from "@headlessui/react";
+import { API_URL } from '@/utils/path';
 
 const page = () => {
     const [showVerificationModal, setShowVerificationModal] = useState(true);
@@ -52,7 +53,7 @@ const page = () => {
                     }
 
                     const response: AxiosResponse<any> = await axios.post(
-                      "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/auth/login/verify",
+                      `${API_URL}/auth/login/verify`,
                       {
                         email,
                         code: verificationCode,

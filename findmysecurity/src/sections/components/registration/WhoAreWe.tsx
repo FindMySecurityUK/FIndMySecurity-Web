@@ -16,6 +16,7 @@ import BusinessForm from "./CorporateForm";
 import axios, { AxiosResponse } from "axios";
 import { Dialog } from "@headlessui/react";
 import toast from "react-hot-toast";
+import { API_URL } from "@/utils/path";
 
 interface RegistrationResponse {
   message?: string;
@@ -72,7 +73,7 @@ export default function RegistrationSelector() {
   const handleFormSubmit = async (formData: any) => {
     try {
       const response: AxiosResponse<RegistrationResponse> = await axios.post(
-        "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/auth/register",
+        `${API_URL}/auth/register`,
         formData
       );
 
@@ -255,7 +256,7 @@ export default function RegistrationSelector() {
                     }
 
                     const response: AxiosResponse<any> = await axios.post(
-                      "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/auth/login/verify",
+                      `${API_URL}/auth/login/verify`,
                       {
                         email,
                         code: verificationCode,

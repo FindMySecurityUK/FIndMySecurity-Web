@@ -6,6 +6,7 @@ import CourseProvidersList from "@/app/connecting-business/components/CourseProv
 import MapSection from "@/app/connecting-business/components/MapSection";
 import filtersData from "@/sections/data/secuirty_services.json";
  import {CourseProvidersApiResponse} from "@/app/connecting-business/types"; // Use shared types
+import { API_URL } from "@/utils/path";
 
 
 export default function SecurityCompaniesPage() {
@@ -41,7 +42,7 @@ export default function SecurityCompaniesPage() {
         page,
       });
 
-      const apiUrl = `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/users/course-providers?${queryParams}`;
+      const apiUrl = `${API_URL}/users/course-providers?${queryParams}`;
       const response = await fetch(apiUrl);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

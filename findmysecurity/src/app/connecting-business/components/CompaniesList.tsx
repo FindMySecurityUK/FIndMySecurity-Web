@@ -6,6 +6,7 @@ import AnimateOnScrollProvider from "@/sections/components/animation/AnimateOnSc
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_URL } from "@/utils/path";
 
 // Props Interface
 interface CompaniesListProps {
@@ -88,7 +89,7 @@ try {
     }
 
     const response = await axios.post(
-      "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/favorites",
+      `${API_URL}/favorites`,
       {
         userId,
         targetUserId:targetId,

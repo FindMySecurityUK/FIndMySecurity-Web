@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 
 import axios from 'axios';
 import CourseApplicantAdsPage from './createJobPopup';
+import { API_URL } from '@/utils/path';
 
 
 const initialForm = {
@@ -121,7 +122,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   if (editingJobId) {
     // Update existing job
     await axios.patch(
-      `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course/course-ads/${editingJobId}`,
+      `${API_URL}/course/course-ads/${editingJobId}`,
       payload,
         {
         headers: {
@@ -134,7 +135,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   } else {
     // Create new job
     await axios.post(
-      'https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course/course-ads',
+      `${API_URL}/course/course-ads`,
       payload,
       {
         headers: {
@@ -175,7 +176,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Add other params here if needed
   });
 
-  const url = ` https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course/course-ads/postedBy/${userId}?${params.toString()}`;
+  const url = ` ${API_URL}/course/course-ads/postedBy/${userId}?${params.toString()}`;
 
   const response = await axios.get<CourseResponse>(url, {
     headers: {
@@ -213,7 +214,7 @@ const handleDelete = async (jobId: number) => {
   const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
   try {
     setLoading(true);
-    const res = await fetch(`https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/course/course-ads/${jobId}`, {
+    const res = await fetch(`${API_URL}/course/course-ads/${jobId}`, {
       method: 'DELETE',
      
           headers: { Authorization: `Bearer ${token}` },
