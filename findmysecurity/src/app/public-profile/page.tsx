@@ -260,12 +260,10 @@ const response = await axios.put(
   
 
 
-  // axios returns response data directly under `response.data`
   if (!response.data.ok) {
     throw new Error(response.data.message || `Request failed (${response.status})`);
   }
 
-  // Access the parsed result directly
   const result = response.data;
   safeLocalStorageSet("loginData", JSON.stringify(result?.user));
   toast.success("Profile updated successfully!");
