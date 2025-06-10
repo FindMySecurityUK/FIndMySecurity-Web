@@ -4,6 +4,7 @@ import clsx from "clsx";
 import PaymentForm from "./PaymentForm"; // Import the hosted Stripe checkout
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/utils/Stripe";
+import { API_URL } from "@/utils/path";
 
 interface Plan {
   id: number;
@@ -45,7 +46,7 @@ const SubscriptionPopup = ({ roleId, onClose }: Props) => {
       try {
         const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
         const res = await axios.get(
-          `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/stripe/product/${roleId}`,
+          `${API_URL}/stripe/product/${roleId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -81,7 +82,7 @@ const SubscriptionPopup = ({ roleId, onClose }: Props) => {
 
     try {
       const response = await fetch(
-        "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/stripe/create-checkout-session",
+        `${API_URL}/stripe/create-checkout-session`,
         {
           method: "POST",
           headers: {

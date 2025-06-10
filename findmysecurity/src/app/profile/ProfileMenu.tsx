@@ -169,7 +169,7 @@ const menuItems = [
   ...((roleId === 3|| roleId === 6)
    
       ? []
-      : [{ icon: <FaAd />, label: "Post Free Ad", route: "/post-ad" }]
+      : [{ icon: <FaAd />, label: "Post Free Job", route: "/post-ad" }]
   ),
 ...(roleId === 3 || roleId === 6
     ? [{ icon: <FaAd />, label: "View Jobs", route: "/view-ads" }]    :[]),

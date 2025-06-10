@@ -199,20 +199,20 @@ const CompanyProfileCard: React.FC<{ company: Company }> = ({ company }) => {
   } = securityCompany;
 
   return (
-    <div className="max-w-5xl mx-auto my-10 px-4 sm:px-6 bg-white rounded-lg shadow-lg p-6">
-      <div className="flex flex-col sm:flex-row items-start gap-6 bg-white rounded-lg p-6">
-        <div className="flex-shrink-0">
+    <div className="max-w-5xl mx-auto my-6 px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow">
+      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 bg-white rounded-lg p-4 sm:p-6">
+        <div className="flex-shrink-0 mx-auto sm:mx-0">
           <img
             src={profile?.profilePhoto || '/images/company.jpg'}
             alt={`${companyName} logo`}
-            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border border-gray-200"
+            className="w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover border border-gray-200"
           />
           <CompanyIcons />
         </div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-800">{companyName}</h2>
-          <p className="text-gray-600 mt-2">{jobTitle || "Security Services Provider"}</p>
-          <div className="flex flex-col sm:flex-row mt-6 gap-3">
+        <div className="flex-1 text-center sm:text-left">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{companyName}</h2>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">{jobTitle || "Security Services Provider"}</p>
+          <div className="flex flex-col sm:flex-row mt-4 sm:mt-6 gap-2 sm:gap-3">
             <Section
               label="Chat on Whatsapp"
               value={phoneNumber}
@@ -244,7 +244,7 @@ const CompanyProfileCard: React.FC<{ company: Company }> = ({ company }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 bg-white rounded-lg p-6 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8 bg-white rounded-md p-4 sm:p-6 shadow-sm">
         <Section label="Company Name" value={companyName} />
         <Section label="Contact Person" value={contactPerson} />
         <Section label="Job Title" value={jobTitle} />
@@ -258,7 +258,7 @@ const CompanyProfileCard: React.FC<{ company: Company }> = ({ company }) => {
 
       <ProfileGroup title="Services Requirements" data={{ services: servicesRequirements }} />
       <ProfileGroup title="Security Services Offerings" data={{ offerings: securityServicesOfferings }} />
-      <ProfileGroup title="Permissions" data={permissions} />
+      {/* <ProfileGroup title="Permissions" data={permissions} /> */}
       <ProfileGroup
         title="Primary Contact"
         data={{

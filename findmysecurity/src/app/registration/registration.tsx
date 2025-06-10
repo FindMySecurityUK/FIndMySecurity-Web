@@ -170,7 +170,7 @@ const ClientGeneralForm = () => {
         <div className="flex items-center space-x-2">
           <input type="checkbox" name="acceptTerms" checked={formData.acceptTerms} onChange={handleChange} required className="w-4 h-4" />
           <label className="text-sm">
-            Please tick here to confirm that you have read our <a href="#" className="text-black underline">Terms and Conditions</a>.
+            Please tick here to confirm that you have read our <a href="/legal/terms" className="text-black underline">Terms and Conditions</a>.
           </label>
         </div>
 

@@ -50,7 +50,7 @@
 //     setLoading(true);
 //     try {
 //       const res = await fetch(
-//         `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/tender/contracts?q=${encodeURIComponent(query)}&page=${page}&pageSize=10`,
+//         `${API_URL}/tender/contracts?q=${encodeURIComponent(query)}&page=${page}&pageSize=10`,
 //         {
 //           method: 'GET',
 //          headers: {
@@ -222,6 +222,7 @@ import {
   LinkIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { API_URL } from "@/utils/path";
 
 interface User {
   id: number;
@@ -300,8 +301,8 @@ const fetchJobs = async (
     }
 
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-    const tenderUrl = `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/tender?${params.toString()}`;
-    const altUrl = `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/tender/contracts?q=${encodeURIComponent(
+    const tenderUrl = `${API_URL}/tender?${params.toString()}`;
+    const altUrl = `${API_URL}/tender/contracts?q=${encodeURIComponent(
       searchTerm
     )}&page=${page}&pageSize=${limit}`;
 

@@ -54,11 +54,19 @@ const AboutSection: React.FC<AboutSectionProps> = ({ profile, roleId, userId }) 
           toast.error("Unknown profile role.");
           return;
       }
+      let payload = {}
+      if(roleId===7){
+        payload = {
+          ...profile,
+          ...formData,
+        };
+      }
+      else if(roleId===6 || roleId===5){
+        payload = {
+          ...formData,
+        };
+      }
 
-      const payload = {
-        // ...profile,
-        ...formData,
-      };
 
       await axios.put(endpoint, payload, {
         headers: {

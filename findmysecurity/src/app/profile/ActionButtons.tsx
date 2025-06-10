@@ -71,16 +71,6 @@ interface PaymentMethod {
     };
   };
 }
-// interface Document {
-//   id?: string;
-//   url: string;
-//   name: string;
-//   type: string;
-//   size: string;
-//   uploadedAt: string;
-//   loading?: boolean;
-//   status?: string;
-// }
 
 interface Document {
   id?: string;
@@ -185,50 +175,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 
     fetchSubscriptionDetails();
   }, []);
-//   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, '');
-//     const file = e.target.files?.[0];
-//     if (!file) return;
 
-//     setLoading(true);
-
-//     try {
-//       const {fileUrl , signedUrl} = await uploadToS3({ file });
-
-//       if (!fileUrl || typeof fileUrl !== "string" || !fileUrl.startsWith("http")) {
-//         throw new Error("Invalid S3 URL returned");
-//       }
-
-//       const dbRes = await fetch(`${API_URL}/document/upload`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${token}`,
-//         },
-//         body: JSON.stringify({
-//           url: encodeURI(fileUrl),
-//           userId: loginData?.id || loginData?.userId || 1,
-//         }),
-//       });
-
-//       const dbResult = await dbRes.json();
-//       // console.log("dbResult",dbResult)
-//       if (!dbRes.ok) {
-//         throw new Error("DB Save Failed");
-//       }
-// // console.log(signedUrl)
-//       const newDoc = await fetchDocumentDetails(signedUrl);
-//       setDocuments((prev) => [...prev, newDoc]);
-//       await refreshUserData();
-
-//       setSnackbar({ open: true, message: 'Document uploaded successfully!', severity: 'success' });
-//     } catch (err) {
-//       console.error("Upload Error:", err);
-//       setSnackbar({ open: true, message: 'Document upload failed.', severity: 'error' });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
   const file = e.target.files?.[0];
@@ -323,39 +270,7 @@ useEffect(() => {
     loadDocuments();
   }
 }, [loginData]);
-  // const fetchDocumentDetails = async (url: string): Promise<Document> => {
-  //   try {
-  //     const response = await fetch(url, { method: 'HEAD' });
-      
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-      
-  //     const contentLength = response.headers.get('content-length');
-  //     const lastModified = response.headers.get('last-modified');
-      
-  //     const fileName = decodeURIComponent(url.split('/').pop() || "Document");
-  //     const fileType = url.split('.').pop()?.toUpperCase() || 'FILE';
-  //     return {
-  //       url,
-  //       name: fileName,
-  //       type: fileType,
-  //       size: contentLength ? formatFileSize(parseInt(contentLength)) : 'Unknown',
-  //       uploadedAt: lastModified ? new Date(lastModified).toLocaleDateString() : 'Unknown date',
-  //       loading: false
-  //     };
-  //   } catch (error) {
-  //     console.error(`Error fetching document details for ${url}:`, error);
-  //     return {
-  //       url,
-  //       name: decodeURIComponent(url.split('/').pop() || "Document"),
-  //       type: url.split('.').pop()?.toUpperCase() || 'FILE',
-  //       size: 'Unknown',
-  //       uploadedAt: 'Unknown date',
-  //       loading: false
-  //     };
-  //   }
-  // };
+  
   const fetchDocumentDetails = async (signedUrl: string): Promise<Document> => {
     try {
       console.log("Fetching details for:", signedUrl);
@@ -1001,11 +916,95 @@ export default ActionButtons;
 
 
 
+// interface Document {
+//   id?: string;
+//   url: string;
+//   name: string;
+//   type: string;
+//   size: string;
+//   uploadedAt: string;
+//   loading?: boolean;
+//   status?: string;
+// }
 
 
+//   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, '');
+//     const file = e.target.files?.[0];
+//     if (!file) return;
 
+//     setLoading(true);
 
+//     try {
+//       const {fileUrl , signedUrl} = await uploadToS3({ file });
 
+//       if (!fileUrl || typeof fileUrl !== "string" || !fileUrl.startsWith("http")) {
+//         throw new Error("Invalid S3 URL returned");
+//       }
+
+//       const dbRes = await fetch(`${API_URL}/document/upload`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify({
+//           url: encodeURI(fileUrl),
+//           userId: loginData?.id || loginData?.userId || 1,
+//         }),
+//       });
+
+//       const dbResult = await dbRes.json();
+//       // console.log("dbResult",dbResult)
+//       if (!dbRes.ok) {
+//         throw new Error("DB Save Failed");
+//       }
+// // console.log(signedUrl)
+//       const newDoc = await fetchDocumentDetails(signedUrl);
+//       setDocuments((prev) => [...prev, newDoc]);
+//       await refreshUserData();
+
+//       setSnackbar({ open: true, message: 'Document uploaded successfully!', severity: 'success' });
+//     } catch (err) {
+//       console.error("Upload Error:", err);
+//       setSnackbar({ open: true, message: 'Document upload failed.', severity: 'error' });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+// const fetchDocumentDetails = async (url: string): Promise<Document> => {
+  //   try {
+  //     const response = await fetch(url, { method: 'HEAD' });
+      
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+      
+  //     const contentLength = response.headers.get('content-length');
+  //     const lastModified = response.headers.get('last-modified');
+      
+  //     const fileName = decodeURIComponent(url.split('/').pop() || "Document");
+  //     const fileType = url.split('.').pop()?.toUpperCase() || 'FILE';
+  //     return {
+  //       url,
+  //       name: fileName,
+  //       type: fileType,
+  //       size: contentLength ? formatFileSize(parseInt(contentLength)) : 'Unknown',
+  //       uploadedAt: lastModified ? new Date(lastModified).toLocaleDateString() : 'Unknown date',
+  //       loading: false
+  //     };
+  //   } catch (error) {
+  //     console.error(`Error fetching document details for ${url}:`, error);
+  //     return {
+  //       url,
+  //       name: decodeURIComponent(url.split('/').pop() || "Document"),
+  //       type: url.split('.').pop()?.toUpperCase() || 'FILE',
+  //       size: 'Unknown',
+  //       uploadedAt: 'Unknown date',
+  //       loading: false
+  //     };
+  //   }
+  // };
 
 
 // {shouldShowDocuments && 

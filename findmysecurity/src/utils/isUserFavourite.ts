@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_URL } from "./path";
 
 interface TargetUser {
   id: number;
@@ -32,7 +33,7 @@ export const isUserFavorite = async (targetUserId: number): Promise<boolean> => 
 
   try {
     const response = await axios.get<{ data: FavoriteItem[] }>(
-      `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/favorites/${userId}`,
+      `${API_URL}/favorites/${userId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

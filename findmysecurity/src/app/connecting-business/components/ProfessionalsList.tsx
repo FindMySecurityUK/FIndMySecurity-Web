@@ -7,6 +7,7 @@ import AnimateOnScrollProvider from "@/sections/components/animation/AnimateOnSc
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_URL } from "@/utils/path";
 
 interface Professional {
   id: number;
@@ -152,7 +153,7 @@ const ProfessionalCard = ({ professional }: { professional: Professional }) => {
     const fetchFavorites = async () => {
       try {
         const response = await axios.get(
-          `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/favorites/${userId}`,
+          `${API_URL}/favorites/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -180,7 +181,7 @@ const ProfessionalCard = ({ professional }: { professional: Professional }) => {
     try {
       if (alreadyFavorited) {
         await axios.delete(
-          "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/favorites",
+          `${API_URL}/favorites`,
           {
             data: { userId, targetUserId: targetId },
             headers: {
@@ -193,7 +194,7 @@ const ProfessionalCard = ({ professional }: { professional: Professional }) => {
         setFavorites((prev) => prev.filter((id) => id !== targetId));
       } else {
         const response = await axios.post(
-          "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/favorites",
+          `${API_URL}/favorites`,
           { userId, targetUserId: targetId },
           {
             headers: {

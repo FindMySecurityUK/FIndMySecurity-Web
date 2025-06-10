@@ -14,6 +14,7 @@ import {
   AiFillFileText,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
+import { API_URL } from "@/utils/path";
 
 interface SectionProps {
   label: string;
@@ -89,8 +90,25 @@ const Section = ({
     </div>
   );
 };
-
 const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
+  // Helper function to detect if a value is a URL
+  const isURL = (value: string): boolean => {
+    try {
+      const urlPattern = /^(https?:\/\/[^\s/$.?#].[^\s]*)$/i;
+      return urlPattern.test(value);
+    } catch {
+      return false;
+    }
+  };
+
+  // Format key for display (e.g., camelCase to Title Case)
+  const formatKey = (key: string): string => {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
   const validEntries = Object.entries(data || {}).filter(
     ([, val]) =>
       val !== null &&
@@ -98,7 +116,9 @@ const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
       val !== undefined &&
       (typeof val !== "object" || (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0))
   );
+
   if (validEntries.length === 0) return null;
+
   return (
     <div className="mt-8 bg-gray-50 rounded-xl border p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">{title}</h3>
@@ -107,17 +127,57 @@ const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
           typeof val === "object" && !Array.isArray(val) && val !== null ? (
             <ProfileGroup key={key} title={formatKey(key)} data={val} />
           ) : (
-            <Section
-              key={key}
-              label={formatKey(key)}
-              value={Array.isArray(val) ? val.join(", ") : val?.toString()}
-            />
+            <div key={key} className="flex flex-col">
+              <span className="text-sm font-medium text-gray-600">{formatKey(key)}</span>
+              {typeof val === "string" && isURL(val) ? (
+                <a
+                  href={val}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  {val}
+                </a>
+              ) : (
+                <span className="text-gray-800">
+                  {Array.isArray(val) ? val.join(", ") : String(val)}
+                </span>
+              )}
+            </div>
           )
         )}
       </div>
     </div>
   );
 };
+// const ProfileGroup = ({ title, data }: { title: string; data: any }) => {
+//   const validEntries = Object.entries(data || {}).filter(
+//     ([, val]) =>
+//       val !== null &&
+//       val !== "" &&
+//       val !== undefined &&
+//       (typeof val !== "object" || (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0))
+//   );
+//   if (validEntries.length === 0) return null;
+//   return (
+//     <div className="mt-8 bg-gray-50 rounded-xl border p-6 shadow-sm">
+//       <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">{title}</h3>
+//       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//         {validEntries.map(([key, val]) =>
+//           typeof val === "object" && !Array.isArray(val) && val !== null ? (
+//             <ProfileGroup key={key} title={formatKey(key)} data={val} />
+//           ) : (
+//             <Section
+//               key={key}
+//               label={formatKey(key)}
+//               value={Array.isArray(val) ? val.join(", ") : val?.toString()}
+//             />
+//           )
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 
 const formatKey = (key: string) =>
   key
@@ -220,7 +280,7 @@ const DocumentsSection = ({
     try {
       setLoadingUrls((prev) => ({ ...prev, [docId]: true }));
       const response = await fetch(
-        `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/file/file-url?fileName=${encodeURIComponent(fileName)}`
+        `${API_URL}/file/file-url?fileName=${encodeURIComponent(fileName)}`
       );
       if (!response.ok) throw new Error(`Failed to fetch URL for ${fileName}`);
       const data = await response.json();
@@ -260,7 +320,7 @@ const DocumentsSection = ({
   const checkDocumentAccess = async () => {
     try {
       const response = await fetch(
-        `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
+        `${API_URL}/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
       );
       const result = await response.json();
       if (response.ok && result.hasAccess) {
@@ -279,7 +339,7 @@ const DocumentsSection = ({
     setError(null);
     try {
       const response = await fetch(
-        "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+        "${API_URL}/document/request",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -487,121 +547,116 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
     serviceRequirements: profileData?.serviceRequirements,
   };
   
-  const profilePhoto = user?.individualProfessional?.profile?.profilePhoto;
+  const profilePhoto = user?.profile;
   const documents = user?.individualProfessional?.documents || [];
   const currentUser = localStorage.getItem("loginData");
   const userId = currentUser ? JSON.parse(currentUser).id : null;
   const targetUserId = user.id || 38;
   
   return (
-    <div className="max-w-5xl mx-auto my-10 px-6 bg-white rounded-lg shadow p-6">
-      <div className="flex flex-col items-left text-left bg-white rounded-lg shadow p-6">
-        <div className="flex flex-row">
-          <div className="relative w-fit">
-            <div
-              className={`w-36 h-36 rounded-full p-1 ${
-                isSubscriber
-                  ? subscriptionTier === "Premium"
-                    ? "bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-500"
-                    : subscriptionTier === "Standard"
-                    ? "bg-gradient-to-tr from-gray-300 via-gray-200 to-gray-400"
-                    : "bg-green-500"
-                  : ""
-              }`}
-            >
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-white p-[2px]">
-                <img
-                  src={profilePhoto || img.src}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              </div>
-            </div>
-            <div className="flex -mt-3 flex-col items-center">
-              {isSubscriber && (
-                <div className="bg-white rounded-full p-1 shadow-md border border-gray-300">
-                  <span className="text-green-600 text-xs font-bold">Subscriber {subscriptionTier}</span>
-                </div>
-              )}
-              {documents && documents.length > 0 && <ProfessionalIcons />}
-            </div>
-          </div>
-          <div className="mx-6 my-4">
-            <h2 className="text-2xl font-bold text-gray-800">{firstName} {lastName}</h2>
-            <p className="text-gray-600">{role}</p>
-            {profileData?.basicInfo?.profileHeadline && (
-              <p className="text-gray-500 text-sm mt-1">
-                {profileData.basicInfo.profileHeadline}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row mt-6 gap-3">
-              <Section
-                label="Chat on Whatsapp"
-                value={phoneNumber}
-                onClick={() => window.open(`https://wa.me/${phoneNumber?.replace(/[^\d]/g, '')}`, "_blank")}
-                clickable
-                hiddenValue
-                showIcon
-              />
-              <Section
-                label="Mobile"
-                value={phoneNumber}
-                onClick={() => window.location.href = `tel:${phoneNumber}`}
-                clickable
-                hiddenValue
-                showIcon
-              />
-              <Section
-                label="Message"
-                value={email}
-                onClick={() => window.location.href = `mailto:${email}`}
-                clickable
-                hiddenValue
-                showIcon
-              />
-            </div>
+<div className="max-w-5xl mx-auto my-6 px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow">
+  <div className="flex flex-col text-left bg-white rounded-lg shadow p-4 sm:p-6">
+    <div className="flex flex-col sm:flex-row sm:items-start">
+      <div className="relative w-fit mx-auto sm:mx-0">
+        <div
+          className={`w-24 h-24 sm:w-36 sm:h-36 rounded-full p-1 ${
+            isSubscriber
+              ? subscriptionTier === "Premium"
+                ? "bg-gradient-to-tr from-yellow-400 via-yellow-300 to-yellow-500"
+                : subscriptionTier === "Standard"
+                ? "bg-gradient-to-tr from-gray-300 via-gray-200 to-gray-400"
+                : "bg-green-500"
+              : ""
+          }`}
+        >
+          <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white p-[2px]">
+            <img
+              src={profilePhoto || img.src}
+              alt="Profile"
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
         </div>
+        <div className="flex flex-col items-center -mt-3">
+          {isSubscriber && (
+            <div className="bg-white rounded-full p-1 shadow-md border border-gray-300">
+              <span className="text-green-600 text-xs sm:text-sm font-bold">Subscriber {subscriptionTier}</span>
+            </div>
+          )}
+          {documents && documents.length > 0 && <ProfessionalIcons />}
+        </div>
       </div>
-      {role != "IndividualProfessional" && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-10 mt-10 bg-white rounded-lg shadow p-6">
-        <Section label="Date of Birth" value={dateOfBirth} />
-        <Section label="Address" value={address} />
-        {postcode && <Section label="Postcode" value={postcode} />}
-        {screenName && <Section label="Screen Name" value={profileData?.screenName || screenName} />}
-      </div>
-      )}
-
-      <ProfileGroup title="Basic Info" data={basicInfo} />
-      <ProfileGroup title="About" data={aboutMe} />
-      <ProfileGroup title="Fees" data={fee} />
-      <ProfileGroup title="Contact Info" data={contactInfo} />
-      <ProfileGroup title="Services" data={services} />
-      {profileData?.weeklySchedule ? (
-        <div className="mt-10 bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Availability</h3>
-          <p className="text-sm text-gray-600 mb-2">
-            {profileData.availabilityDescription || "Weekly schedule:"}
+      <div className="mx-0 sm:mx-6 my-4 text-center sm:text-left">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{firstName} {lastName}</h2>
+        <p className="text-gray-600 text-sm sm:text-base">{role}</p>
+        {profileData?.basicInfo?.profileHeadline && (
+          <p className="text-gray-500 text-xs sm:text-sm mt-1">
+            {profileData.basicInfo.profileHeadline}
           </p>
-          <AvailabilityTable schedule={profileData.weeklySchedule} />
+        )}
+        <div className="flex flex-col sm:flex-row mt-4 sm:mt-6 gap-2 sm:gap-3">
+          <Section
+            label="Chat on Whatsapp"
+            value={phoneNumber}
+            onClick={() => window.open(`https://wa.me/${phoneNumber?.replace(/[^\d]/g, '')}`, "_blank")}
+            clickable
+            hiddenValue
+            showIcon
+          />
+          <Section
+            label="Mobile"
+            value={phoneNumber}
+            onClick={() => window.location.href = `tel:${phoneNumber}`}
+            clickable
+            hiddenValue
+            showIcon
+          />
+          <Section
+            label="Message"
+            value={email}
+            onClick={() => window.location.href = `mailto:${email}`}
+            clickable
+            hiddenValue
+            showIcon
+          />
         </div>
-      ) : (
-        <div className="mt-10 bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 shadow-sm">
-          No professional profile available.
-        </div>
-      )}
-      {documents && documents.length > 0 ? (
-        <DocumentsSection documents={documents} userId={userId} targetUserId={targetUserId} />
-      ) : (
-        <div className="mt-10 bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 shadow-sm">
-          No documents available.
-        </div>
-      )}
-      <ProfileGroup
-        title="Permissions"
-        data={user?.individualProfessional?.permissions || user?.permissions}
-      />
+      </div>
     </div>
+  </div>
+  {role !== "IndividualProfessional" && (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-10 bg-white rounded-lg shadow p-4 sm:p-6">
+      <Section label="Date of Birth" value={dateOfBirth} />
+      <Section label="Address" value={address} />
+      {postcode && <Section label="Postcode" value={postcode} />}
+      {screenName && <Section label="Screen Name" value={profileData?.screenName || screenName} />}
+    </div>
+  )}
+  <ProfileGroup title="Basic Info" data={basicInfo} />
+  <ProfileGroup title="About" data={aboutMe} />
+  <ProfileGroup title="Fees" data={fee} />
+  <ProfileGroup title="Contact Info" data={contactInfo} />
+  <ProfileGroup title="Services" data={services} />
+  {profileData?.weeklySchedule ? (
+    <div className="mt-6 sm:mt-10 bg-white rounded-lg shadow p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Availability</h3>
+      <p className="text-xs sm:text-sm text-gray-600 mb-2">
+        {profileData.availabilityDescription || "Weekly schedule:"}
+      </p>
+      <AvailabilityTable schedule={profileData.weeklySchedule} />
+    </div>
+  ) : (
+    <div className="mt-6 sm:mt-10 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 text-center text-gray-500 text-sm sm:text-base shadow-sm">
+      No professional profile available.
+    </div>
+  )}
+  {documents && documents.length > 0 ? (
+    <DocumentsSection documents={documents} userId={userId} targetUserId={targetUserId} />
+  ) : (
+    <div className="mt-6 sm:mt-10 bg-white rounded-xl border border-gray-200 p-4 sm:p-6 text-center text-gray-500 text-sm sm:text-base shadow-sm">
+      No documents available.
+    </div>
+  )}
+</div>
   );
 };
 
@@ -813,7 +868,7 @@ export default UserProfileCard;
 //   const checkDocumentAccess = async () => {
 //     try {
 //       const response = await fetch(
-//         `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
+//         `${API_URL}/document/access-check?requesterId=${requesterId}&targetUserId=${targetUserId}`
 //       );
 //       if (response.ok) {
 //         const result = await response.json();
@@ -839,7 +894,7 @@ export default UserProfileCard;
 //     }
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1231,7 +1286,7 @@ export default UserProfileCard;
 
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1617,7 +1672,7 @@ export default UserProfileCard;
 
 //     try {
 //       const response = await fetch(
-//         "https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request",
+//         "${API_URL}/document/request",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -1819,7 +1874,7 @@ export default UserProfileCard;
 // //     }
 
 // //     try {
-// //       const response = await fetch("https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/document/request", {
+// //       const response = await fetch("${API_URL}/document/request", {
 // //         method: "POST",
 // //         headers: { "Content-Type": "application/json" },
 // //         body: JSON.stringify({

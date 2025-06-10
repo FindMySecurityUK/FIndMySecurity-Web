@@ -7,6 +7,7 @@ import lookingForData from "@/sections/data/secuirty_professional.json";
 import { ApiResponse } from "@/app/connecting-business/types";
 import ProfessionalsList from "@/app/connecting-business/components/ProfessionalsList";
 import MapSection from "@/app/connecting-business/components/MapSection";
+import { API_URL } from "@/utils/path";
 
 // Define valid time slots and days for type safety
 type TimeSlot = "Morning" | "Afternoon" | "Evening" | "Overnight";
@@ -73,7 +74,7 @@ export default function ProfessionalsPage() {
       if (pageSize) queryParamsArray.push(`pageSize=${encodeURIComponent(pageSize.toString())}`);
 
       const queryString = queryParamsArray.length > 0 ? `?${queryParamsArray.join('&')}` : '';
-      const apiUrl = `https://ub1b171tga.execute-api.eu-north-1.amazonaws.com/dev/users/professionals${queryString}`;
+      const apiUrl = `${API_URL}/users/professionals${queryString}`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
