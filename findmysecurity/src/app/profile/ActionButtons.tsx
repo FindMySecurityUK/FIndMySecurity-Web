@@ -44,9 +44,7 @@ import axios from 'axios';
 import SubscriptionPopup from "@/sections/components/Subscription-plan-popup/SubscriptionPopup";
 import SubscriptionBox from "./components/SubscriptionBox";
 import { API_URL } from "@/utils/path";
- // adjust path as needed
 
- 
 interface SubscriptionDetails {
   status: string;
   startDate: string;
@@ -74,8 +72,8 @@ interface PaymentMethod {
 
 interface Document {
   id?: string;
-  url: string; // Permanent S3 URL
-  signedUrl: string; // GET pre-signed URL for metadata
+  url: string;
+  signedUrl: string;
   name: string;
   type: string;
   size: string;
@@ -136,19 +134,18 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
-
   const [error, setError] = useState<string | null>(null);
   const shouldShowDocuments = roleId === 3;
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleClick = () => {
-    inputRef.current?.click(); // open file dialog
+    inputRef.current?.click();
   };
- useEffect(() => {
+
+  useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       try {
         const token = localStorage.getItem('authToken')?.replace(/^"|"$/g, '');
-
         const response = await axios.get(
           `${API_URL}/stripe/get-subscription-details?userId=${loginData?.id || loginData?.userId || 1}`,
           {
@@ -159,7 +156,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         );
 
         const { success, result, message } = response.data;
-
         if (success) {
           setSubscriptionDetails(result.subscriptionDetails);
           setPaymentMethod(result.paymentMethod);
@@ -167,7 +163,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           throw new Error(message || 'Failed to fetch subscription');
         }
       } catch (err: any) {
-        setError(err.message || 'Something went wrong');
+        setError(err.message || 'Please try again');
       } finally {
         setLoading(false);
       }
@@ -176,136 +172,138 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     fetchSubscriptionDetails();
   }, []);
 
-const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  setLoading(true);
-  try {
-    const { fileUrl, signedUrl } = await uploadToS3({ file });
-    if (!fileUrl || typeof fileUrl !== "string" || !fileUrl.startsWith("http")) {
-      throw new Error("Invalid S3 URL returned");
+    if (file.type !== "application/pdf") {
+      setSnackbar({
+        open: true,
+        message: "Please upload your documents in PDF format only. Other file types (e.g., Word, JPEG, PNG) are not accepted.",
+        severity: "error"
+      });
+      return;
     }
 
-    const dbRes = await fetch(`${API_URL}/document/upload`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        url: fileUrl,
-        key: fileUrl.split("/").pop(), // Store S3 key
-        userId: loginData?.id || loginData?.userId || 1,
-      }),
-    });
-
-    const dbResult = await dbRes.json();
-    if (!dbRes.ok) {
-      throw new Error("DB Save Failed: " + dbResult.message);
-    }
-
-    console.log("GET signedUrl:", signedUrl, "Timestamp:", new Date().toISOString());
-    const newDoc = await fetchDocumentDetails(signedUrl); // Use GET signed URL
-    setDocuments((prev) => [...prev, { ...newDoc, id: dbResult.id }]);
-    await refreshUserData();
-    setSnackbar({ open: true, message: "Document uploaded successfully!", severity: "success" });
-  } catch (err) {
-    console.error("Upload Error:", err);
-    setSnackbar({ open: true, message: "Document upload failed.", severity: "error" });
-  } finally {
-    setLoading(false);
-  }
-};
-
-useEffect(() => {
-  const loadDocuments = async () => {
-    const rawDocuments = loginData?.individualProfessional?.documents || [];
-    setLoadingDocuments(true);
-    const initialDocuments = rawDocuments.map((doc: any) => ({
-      id: doc.id,
-      url: doc.url,
-      signedUrl: doc.url, // Temporary placeholder
-      name: decodeURIComponent(doc.url?.split("/").pop() || "Document"),
-      type: doc.url?.split(".").pop()?.toUpperCase() || "FILE",
-      size: "Loading...",
-      uploadedAt: doc.uploadedAt,
-      status: doc.status,
-      loading: true,
-    }));
-    setDocuments(initialDocuments);
-
+    setLoading(true);
     try {
-      const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
-      const response = await fetch(`${API_URL}/document/generate-presigned-urls`, {
+      const { fileUrl, signedUrl } = await uploadToS3({ file });
+      if (!fileUrl || typeof fileUrl !== "string" || !fileUrl.startsWith("http")) {
+        throw new Error("Invalid S3 URL returned");
+      }
+
+      const dbRes = await fetch(`${API_URL}/document/upload`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ documentIds: rawDocuments.map((doc: any) => doc.id) }),
+        body: JSON.stringify({
+          url: fileUrl,
+          key: fileUrl.split("/").pop(),
+          userId: loginData?.id || loginData?.userId || 1,
+        }),
       });
-      const { urls } = await response.json();
-      if (!response.ok) {
-        throw new Error("Failed to fetch pre-signed URLs");
+
+      const dbResult = await dbRes.json();
+      if (!dbRes.ok) {
+        throw new Error("DB Save Failed: " + dbResult.message);
       }
 
-      console.log("Pre-signed URLs:", urls);
-      const detailedDocuments = await Promise.all(
-        urls.map((item: { signedUrl: string }) => fetchDocumentDetails(item.signedUrl))
-      );
-      const mergedDocuments = initialDocuments.map((doc: { id: string; url: string }) => {
-        const detail = detailedDocuments.find((d) => d.url === doc.url);
-        return detail ? { ...doc, ...detail, id: doc.id, loading: false } : doc;
-      });
-      setDocuments(mergedDocuments);
+      const newDoc = await fetchDocumentDetails(signedUrl, file.size, new Date());
+      setDocuments((prev) => [...prev, { ...newDoc, id: dbResult.id }]);
+      await refreshUserData();
+      setSnackbar({ open: true, message: "Document uploaded successfully!", severity: "success" });
     } catch (err) {
-      console.error("Error loading document details:", err);
+      console.error("Upload Error:", err);
+      setSnackbar({ open: true, message: "Document upload failed.", severity: "error" });
     } finally {
-      setLoadingDocuments(false);
+      setLoading(false);
     }
   };
-  if (loginData?.individualProfessional?.documents) {
-    loadDocuments();
-  }
-}, [loginData]);
-  
-  const fetchDocumentDetails = async (signedUrl: string): Promise<Document> => {
+
+  useEffect(() => {
+    const loadDocuments = async () => {
+      const rawDocuments = loginData?.individualProfessional?.documents || [];
+      setLoadingDocuments(true);
+
+      const initialDocuments = rawDocuments.map((doc: any) => ({
+        id: doc.id,
+        url: doc.url,
+        signedUrl: doc.url,
+        name: decodeURIComponent(doc.url?.split('/').pop() || 'Document'),
+        type: doc.url?.split('.').pop()?.toUpperCase() || 'FILE',
+        size: 'Loading...',
+        uploadedAt: doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : new Date().toLocaleDateString(),
+        status: doc.status,
+        loading: true,
+      }));
+
+      setDocuments(initialDocuments);
+
+      try {
+        const detailedDocuments = await Promise.all(
+          rawDocuments.map((doc: any) => fetchDocumentDetails(doc.url))
+        );
+
+        const mergedDocuments = initialDocuments.map((doc: { id: string; url: string }) => {
+          const detail = detailedDocuments.find(d => d.url === doc.url);
+          return detail ? { ...doc, ...detail, id: doc.id, loading: false } : { ...doc, loading: false };
+        });
+
+        setDocuments(mergedDocuments);
+      } catch (err) {
+        console.error("Error loading document details:", err);
+        setDocuments(initialDocuments.map((doc: any) => ({ ...doc, loading: false })));
+      } finally {
+        setLoadingDocuments(false);
+      }
+    };
+
+    if (loginData?.individualProfessional?.documents) {
+      loadDocuments();
+    }
+  }, [loginData]);
+
+  const fetchDocumentDetails = async (signedUrl: string, localSize?: number, localDate?: Date): Promise<Document> => {
     try {
-      console.log("Fetching details for:", signedUrl);
       const response = await fetch(signedUrl, { method: "HEAD" });
+      const fileName = decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document");
+      const fileType = fileName.split(".").pop()?.toUpperCase() || "FILE";
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const contentLength = response.headers.get("content-length");
       const lastModified = response.headers.get("last-modified");
-      const fileName = decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document");
-      const fileType = fileName.split(".").pop()?.toUpperCase() || "FILE";
-  
+
       return {
-        url: signedUrl.split("?")[0], // Permanent URL
-        signedUrl, // GET signed URL
+        url: signedUrl.split("?")[0],
+        signedUrl,
         name: fileName,
         type: fileType,
-        size: contentLength ? formatFileSize(parseInt(contentLength)) : "Unknown",
-        uploadedAt: lastModified ? new Date(lastModified).toLocaleDateString() : "Unknown date",
+        size: localSize ? formatFileSize(localSize) : (contentLength ? formatFileSize(parseInt(contentLength)) : "Unknown"),
+        uploadedAt: localDate ? localDate.toLocaleDateString() : (lastModified ? new Date(lastModified).toLocaleDateString() : new Date().toLocaleDateString()),
         loading: false,
       };
     } catch (error) {
       console.error(`Error fetching document details for ${signedUrl}:`, error);
+      const fileName = decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document");
+      const fileType = fileName.split(".").pop()?.toUpperCase() || "FILE";
       return {
         url: signedUrl.split("?")[0],
         signedUrl,
-        name: decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document"),
-        type: signedUrl.split(".").pop()?.split("?")[0]?.toUpperCase() || "FILE",
-        size: "Unknown",
-        uploadedAt: "Unknown date",
+        name: fileName,
+        type: fileType,
+        size: localSize ? formatFileSize(localSize) : "Unknown",
+        uploadedAt: localDate ? localDate.toLocaleDateString() : new Date().toLocaleDateString(),
         loading: false,
       };
     }
   };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -313,53 +311,6 @@ useEffect(() => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
-  useEffect(() => {
-    const loadDocuments = async () => {
-      const rawDocuments = loginData?.individualProfessional?.documents || [];
-      setLoadingDocuments(true);
-  
-      const initialDocuments = rawDocuments.map((doc: any) => ({
-        id: doc.id,
-        url: doc.url,
-        name: decodeURIComponent(doc.url?.split('/').pop() || 'Document'),
-        type: doc.url?.split('.').pop()?.toUpperCase() || 'FILE',
-        size: 'Loading...',
-        uploadedAt: doc.uploadedAt,
-        status: doc.status,
-        loading: true,
-      }));
-  
-      setDocuments(initialDocuments);
-  
-      try {
-        const detailedDocuments = await Promise.all(
-          rawDocuments.map((doc: any) => fetchDocumentDetails(doc.url))
-        );
-  
-        const mergedDocuments = initialDocuments.map((doc: { url: any; }) => {
-          const detail = detailedDocuments.find(d => d.url === doc.url);
-          return detail
-            ? {
-                ...doc,
-                ...detail,
-                loading: false,
-              }
-            : doc;
-        });
-  
-        setDocuments(mergedDocuments);
-      } catch (err) {
-        console.error("Error loading document details:", err);
-      } finally {
-        setLoadingDocuments(false);
-      }
-    };
-  
-    if (loginData?.individualProfessional?.documents) {
-      loadDocuments();
-    }
-  }, [loginData]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, doc: Document) => {
     setAnchorEl(event.currentTarget);
@@ -373,10 +324,10 @@ useEffect(() => {
 
   const handleDeleteDocument = async (docId?: string) => {
     if (!docId) return;
-    
+
     setDeletingId(docId);
     const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, '');
-    
+
     try {
       const response = await fetch(`${API_URL}/document/${docId}`, {
         method: 'DELETE',
@@ -409,69 +360,71 @@ useEffect(() => {
   };
 
   const handleDownload = () => {
-    if (selectedDoc) window.open(selectedDoc.url, "_blank");
+    if (selectedDoc) window.open(selectedDoc.signedUrl, "_blank");
     handleMenuClose();
   };
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (doc.status?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-  );
+  const filteredDocuments = () => {
+    return documents.filter(doc => {
+      return (
+        doc.name?.toLowerCase().includes(searchQuery?.toLowerCase() || '') ||
+        doc.type?.toLowerCase().includes(searchQuery?.toLowerCase() || '') ||
+        (doc?.status?.toLowerCase() || '').includes(searchQuery?.toLowerCase() || '')
+      );
+    });
+  };
 
-  const documentGroups = filteredDocuments.reduce((groups: Record<string, Document[]>, doc) => {
-    const type = doc.type;
-    if (!groups[type]) groups[type] = [];
-    groups[type].push(doc);
-    return groups;
-  }, {});
+  const documentGroups = () => {
+    const filteredDocs = filteredDocuments();
+    return filteredDocs.reduce((groups: { [key: string]: Document[] }, doc) => {
+      const type = doc.type;
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push(doc);
+      return groups;
+    }, {});
+  };
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
-  setFormData((prev: any) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
-
-const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  // Show preview immediately
-  const imageUrl = URL.createObjectURL(file);
-  setProfilePhoto(imageUrl);
-setLoading(true);
-  try {
-    // Upload to S3
-    const {fileUrl, signedUrl} = await uploadToS3({ file });
-    console.log(fileUrl)
-    // Store uploaded file URL in formData
-    if(fileUrl){
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData((prev: any) => ({
       ...prev,
-      profile: fileUrl, // store S3 URL, not the file itself
+      [name]: value,
     }));
-  
-  }
-  } catch (err) {
-    console.error('Image upload failed:', err);
-     setLoading(false);
-    alert('Failed to upload image. Please try again.');
-  }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setProfilePhoto(imageUrl);
+    setLoading(true);
+    try {
+      const {fileUrl, signedUrl} = await uploadToS3({ file });
+      if(fileUrl){
+        setFormData((prev: any) => ({
+          ...prev,
+          profile: fileUrl,
+        }));
+      }
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setLoading(false);
+      alert('Failed to upload image. Please try again.');
+    }
     setLoading(false);
-  console.log(formData);
-};
-const isSubscriber = loginData?.isSubscriber;
-const tier = loginData?.subscriptionTier;
+  };
 
-let ringClass = '';
-if (isSubscriber && tier !== 'Basic') {
-  if (tier === 'Standard') ringClass = 'ring-6 ring-gray-400'; // silver
-  else if (tier === 'Premium') ringClass = 'ring-6 ring-yellow-500'; // gold
-}
+  const isSubscriber = loginData?.isSubscriber;
+  const tier = loginData?.subscriptionTier;
 
+  let ringClass = '';
+  if (isSubscriber && tier !== 'Basic') {
+    if (tier === 'Standard') ringClass = 'ring-6 ring-gray-400';
+    else if (tier === 'Premium') ringClass = 'ring-6 ring-yellow-500';
+  }
 
   const handleSubmit = () => {
     updateProfile(formData);
@@ -483,19 +436,18 @@ if (isSubscriber && tier !== 'Basic') {
     setIsEditing(false);
   };
 
-  const profileData = loginData.profile|| loginData?.individualProfessional?.profile?.profilePhoto || '';
+  const profileData = loginData.profile || loginData?.individualProfessional?.profile?.profilePhoto || '';
   const finalImage = profilePhoto || profileData || "/images/profile.png";
-  
+
   return (
     <div className="w-full max-w-5xl mx-auto p-4 space-y-6">
       <div className="flex flex-col items-center md:flex-row md:items-center md:space-x-6">
         <div className="relative w-28 h-28 rounded-full shadow-lg shadow-gray-400 hover:scale-105 transition-transform duration-300">
-         <img
-  src={finalImage}
-  alt="Profile"
-  className={`w-full h-full object-cover rounded-full ${ringClass}`}
-/>
-
+          <img
+            src={finalImage}
+            alt="Profile"
+            className={`w-full h-full object-cover rounded-full ${ringClass}`}
+          />
           {isEditing && (
             <>
               <input
@@ -523,18 +475,13 @@ if (isSubscriber && tier !== 'Basic') {
               : "Mr. Y"}
           </h2>
           <h2 className="text-xl text-gray-600">{formData?.screenName ?? "Mr."}</h2>
-          {roleId === 3 ? ( <p className="text-gray-500">
-            
-            {"Security Professional"}</p>):(
-          
-          <p className="text-gray-500">
-            
-            {loginData?.role?.name ?? loginData?.role ?? "Security Officer"}
-          </p>
-            )}
-          {/* <span className="text-sm text-yellow-500"> */}
-            {/* ✅ Usually responds within 1 hour */}
-          {/* </span> */}
+          {roleId === 3 ? (
+            <p className="text-gray-500">Security Professional</p>
+          ) : (
+            <p className="text-gray-500">
+              {loginData?.role?.name ?? loginData?.role ?? "Security Officer"}
+            </p>
+          )}
         </div>
       </div>
 
@@ -643,253 +590,253 @@ if (isSubscriber && tier !== 'Basic') {
         )}
       </div>
 
-      {/* Upgrade Button */}
-      {!isEditing &&  !loginData.isSubscriber &&(
+      {!isEditing && !loginData.isSubscriber && (
         <></>
-        // <Button
-        //   fullWidth
-        //    onClick={() => setOpen(true)}
-        //   variant="contained"
-        //   sx={{ bgcolor: "#f97316", ":hover": { bgcolor: "#ea580c" } }}
-        // >
-        //   Upgrade My Membership
-        // </Button>
       )}
-             {loginData.isSubscriber && (
-    
-      <SubscriptionBox
-        subscriptionDetails={
-          subscriptionDetails ?? {
-            status: "",
-            startDate: "",
-            endDate: "",
-            nextInvoiceAmount: "",
-            stripeProductName: "",
-            tierName: ""
+      {loginData.isSubscriber && (
+        <SubscriptionBox
+          subscriptionDetails={
+            subscriptionDetails ?? {
+              status: "",
+              startDate: "",
+              endDate: "",
+              nextInvoiceAmount: "",
+              stripeProductName: "",
+              tierName: ""
+            }
           }
-        }
-        paymentMethod={
-          paymentMethod ?? {
-            card: {
-              brand: "",
-              last4: "",
-              exp_month: 0,
-              exp_year: 0,
-            },
-            billing_details: {
-              name: "",
-              email: "",
-              address: {
-                country: null,
+          paymentMethod={
+            paymentMethod ?? {
+              card: {
+                brand: "",
+                last4: "",
+                exp_month: 0,
+                exp_year: 0,
               },
-            },
+              billing_details: {
+                name: "",
+                email: "",
+                address: {
+                  country: null,
+                },
+              },
+            }
           }
-        }
-      />
- 
-          )}
-
-      {/* Documents Section Block */}
+        />
+      )}
 
       {shouldShowDocuments && (
-  <AnimateOnScrollProvider>
-    <div className="space-y-6 mt-5">
-      <Divider className="my-4">
-        <Chip
-          label={
-            <div className="flex items-center space-x-2">
-              <CloudDownload />
-              <span>My Documents ({documents.length})</span>
-            </div>
-          }
-          color="primary"
-        />
-      </Divider>
-      <div className="flex flex-col md:flex-row justify-between gap-4 mt-3">
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-          <TextField
-            size="small"
-            placeholder="Search documents..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FaSearch className="text-gray-400" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ flex: 1, maxWidth: { xs: "100%", sm: 400 } }}
-          />
-          <>
-            <input
-              type="file"
-              accept="*/*"
-              ref={inputRef}
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
-            <Button
-              variant="contained"
-              startIcon={<FaPlus />}
-              onClick={handleClick}
-              sx={{
-                bgcolor: "primary.main",
-                whiteSpace: "nowrap",
-                minWidth: "fit-content",
-                width: { xs: "100%", sm: "auto" },
-              }}
-            >
-              Add Documents
-            </Button>
-            <Backdrop open={loading} sx={{ zIndex: 9999, color: "#fff" }}>
-              <CircularProgress color="inherit" />
-            </Backdrop>
-            <Snackbar
-              open={snackbar.open}
-              autoHideDuration={4000}
-              onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            >
-              <Alert
-                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                severity={snackbar.severity}
-                sx={{ width: "100%" }}
-              >
-                {snackbar.message}
-              </Alert>
-            </Snackbar>
-          </>
-        </div>
-      </div>
-
-      {loadingDocuments && (
-        <div className="flex justify-center items-center py-8">
-          <FaSpinner className="animate-spin text-2xl text-gray-400 mr-2" />
-          <Typography variant="body1" className="text-gray-500">
-            Loading documents...
-          </Typography>
-        </div>
-      )}
-
-      {!loadingDocuments &&
-        Object.entries(documentGroups).map(([type, docs]) => (
-          <div key={type} className="space-y-6">
-            <div className="flex justify-between items-center px-2">
-              <Typography variant="h6" className="font-semibold text-gray-700">
-                {type} Files ({docs.length})
-              </Typography>
-              <Typography variant="body2" className="text-gray-500">
-                {docs.length} items
-              </Typography>
-            </div>
-
-            <div className="space-y-4">
-              {docs.map((doc, index) => {
-                const docName = doc.name.split("-").slice(1).join(" ").replace(/\.[^/.]+$/, "");
-                const chipStyles =
-                  doc.status === "PENDING"
-                    ? { color: "#D97706", bgcolor: "#FEF3C7" }
-                    : doc.status === "APPROVED"
-                    ? { color: "#16A34A", bgcolor: "#DCFCE7" }
-                    : doc.status === "REJECTED"
-                    ? { color: "#DC2626", bgcolor: "#FEE2E2" }
-                    : { color: "#6B7280", bgcolor: "#F3F4F6" };
-
-                return (
-                  <div
-                    key={index}
-                    className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white border border-gray-300 rounded-lg shadow-sm transition-all duration-200 max-w-full overflow-hidden"
-                    data-aos="fade-up"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <Avatar className="w-10 h-10 bg-gray-200 flex-shrink-0">
-                        {fileTypeIcons[doc.type.toLowerCase()] || <FaFileAlt className="text-gray-600" />}
-                      </Avatar>
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <Typography
-                          variant="subtitle1"
-                          className="font-medium text-gray-800 truncate"
-                          title={docName} // Show full name on hover
-                        >
-                          {docName}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-500 truncate">
-                          {doc.loading ? (
-                            <span className="flex items-center">
-                              <FaSpinner className="animate-spin mr-1" size={12} />
-                              Loading details...
-                            </span>
-                          ) : (
-                            <>
-                              {doc.size} • {doc.uploadedAt}
-                            </>
-                          )}
-                        </Typography>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 pt-2 sm:pt-0">
-                      {!doc.loading && (
-                        <Chip
-                          size="small"
-                          label={doc.status || "UNKNOWN"}
-                          sx={{
-                            fontWeight: "bold",
-                            borderRadius: "12px",
-                            padding: "2px 8px",
-                            ...chipStyles,
-                            minWidth: "80px",
-                          }}
-                        />
-                      )}
-                      <Tooltip title="Download">
-                        <IconButton
-                          size="small"
-                          onClick={() => window.open(doc.signedUrl, "_blank")} // Use signedUrl
-                          sx={{
-                            color: "primary.main",
-                            "&:hover": { color: "blue.500" },
-                          }}
-                        >
-                          <FaDownload />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton
-                          size="small"
-                          onClick={() => doc.id && handleDeleteDocument(doc.id)}
-                          disabled={deletingId === doc.id}
-                          sx={{
-                            color: deletingId === doc.id ? "gray.500" : "red.500",
-                            "&:hover": {
-                              color: deletingId === doc.id ? "gray.500" : "red.700",
-                              backgroundColor: deletingId === doc.id ? "transparent" : "rgba(255, 0, 0, 0.08)",
-                            },
-                          }}
-                        >
-                          {deletingId === doc.id ? <FaSpinner className="animate-spin" /> : <FaTrash />}
-                        </IconButton>
-                      </Tooltip>
-                    </div>
+        <AnimateOnScrollProvider>
+          <div className="space-y-6 mt-5">
+            <Divider className="my-4">
+              <Chip
+                label={
+                  <div className="flex items-center space-x-2">
+                    <CloudDownload />
+                    <span>My Documents ({documents.length})</span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+                }
+                color="primary"
+              />
+            </Divider>
+            <div className="flex flex-col md:flex-row justify-between gap-4 mt-3">
+            <div className="w-full flex flex-col gap-2">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2 w-full">
+    <TextField
+      size="small"
+      placeholder="Search documents..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <FaSearch className="text-gray-400" />
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        maxWidth: '100%',
+      }}
+    />
 
-      {!loadingDocuments && filteredDocuments.length === 0 && (
-        <div className="text-center py-8">
-          <FaFileAlt className="mx-auto text-4xl text-gray-300 mb-2" />
-          <Typography variant="body1" className="text-gray-500">
-            {searchQuery ? "No matching documents found" : "No documents uploaded yet"}
-          </Typography>
-        </div>
+    <input
+      type="file"
+      accept="application/pdf"
+      ref={inputRef}
+      onChange={handleFileChange}
+      style={{ display: "none" }}
+    />
+
+    <Button
+      variant="contained"
+      startIcon={<FaPlus />}
+      onClick={handleClick}
+      sx={{
+        bgcolor: "primary.main",
+        whiteSpace: "nowrap",
+        minWidth: "fit-content",
+        width: { xs: "100%", sm: "auto" },
+      }}
+    >
+      Add Documents
+    </Button>
+  </div>
+
+  {/* Help text positioned after both elements */}
+  <Typography variant="caption" className="text-gray-500">
+    Please upload your documents in PDF format only. Other file types (e.g., Word, JPEG, PNG) are not accepted.
+  </Typography>
+
+  {/* Loaders and notifications */}
+  <Backdrop open={loading} sx={{ zIndex: 9999, color: "#fff" }}>
+    <CircularProgress color="inherit" />
+  </Backdrop>
+
+  <Snackbar
+    open={snackbar.open}
+    autoHideDuration={4000}
+    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+    anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+  >
+    <Alert
+      onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      severity={snackbar.severity}
+      sx={{ width: "100%" }}
+    >
+      {snackbar.message}
+    </Alert>
+  </Snackbar>
+</div>
+            </div>
+
+            {loadingDocuments && (
+              <div className="flex justify-center items-center py-8">
+                <FaSpinner className="animate-spin text-2xl text-gray-400 mr-2" />
+                <Typography variant="body1" className="text-gray-500">
+                  Loading documents...
+                </Typography>
+              </div>
+            )}
+
+            {!loadingDocuments &&
+              Object.entries(documentGroups()).map(([type, docs]) => (
+                <div key={type} className="space-y-6">
+                  <div className="flex justify-between items-center px-2">
+                    <Typography variant="h6" className="font-semibold text-gray-700">
+                      {type} Files ({docs.length})
+                    </Typography>
+                    <Typography variant="body2" className="text-gray-500">
+                      {docs.length} items
+                    </Typography>
+                  </div>
+
+                  <div className="space-y-4">
+                    {docs.map((doc, index) => {
+                      const docName = doc.name.split("-").slice(1).join(" ").replace(/\.[^/.]+$/, "");
+                      const chipStyles =
+                        doc.status === "PENDING"
+                          ? { color: "#D97706", bgcolor: "#FEF3C7" }
+                          : doc.status === "APPROVED"
+                          ? { color: "#16A34A", bgcolor: "#DCFCE7" }
+                          : doc.status === "REJECTED"
+                          ? { color: "#DC2626", bgcolor: "#FEE2E2" }
+                          : { color: "#6B7280", bgcolor: "#F3F4F6" };
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white border border-gray-300 rounded-lg shadow-sm transition-all duration-200 max-w-full overflow-hidden"
+                          data-aos="fade-up"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <Avatar className="w-10 h-10 bg-gray-200 flex-shrink-0">
+                              {fileTypeIcons[doc.type.toLowerCase()] || <FaFileAlt className="text-gray-600" />}
+                            </Avatar>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <Typography
+                                variant="subtitle1"
+                                className="font-medium text-gray-800 truncate"
+                                title={docName}
+                              >
+                                {docName}
+                              </Typography>
+                              <Typography variant="body2" className="text-gray-500 truncate">
+                                {doc.loading ? (
+                                  <span className="flex items-center">
+                                    <FaSpinner className="animate-spin mr-1" size={12} />
+                                    Loading details...
+                                  </span>
+                                ) : (
+                                  <>
+                                    {doc.size} • {doc.uploadedAt}
+                                  </>
+                                )}
+                              </Typography>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 pt-2 sm:pt-0">
+                            {!doc.loading && (
+                              <Chip
+                                size="small"
+                                label={doc.status || "UNKNOWN"}
+                                sx={{
+                                  fontWeight: "bold",
+                                  borderRadius: "12px",
+                                  padding: "2px 8px",
+                                  ...chipStyles,
+                                  minWidth: "80px",
+                                }}
+                              />
+                            )}
+                            <Tooltip title="Download">
+                              <IconButton
+                                size="small"
+                                onClick={() => window.open(doc.signedUrl, "_blank")}
+                                sx={{
+                                  color: "primary.main",
+                                  "&:hover": { color: "blue.500" },
+                                }}
+                              >
+                                <FaDownload />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton
+                                size="small"
+                                onClick={() => doc.id && handleDeleteDocument(doc.id)}
+                                disabled={deletingId === doc.id}
+                                sx={{
+                                  color: deletingId === doc.id ? "gray.500" : "red.500",
+                                  "&:hover": {
+                                    color: deletingId === doc.id ? "gray.500" : "red.700",
+                                    backgroundColor: deletingId === doc.id ? "transparent" : "rgba(255, 0, 0, 0.08)",
+                                  },
+                                }}
+                              >
+                                {deletingId === doc.id ? <FaSpinner className="animate-spin" /> : <FaTrash />}
+                              </IconButton>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+            {!loadingDocuments && filteredDocuments().length === 0 && (
+              <div className="text-center py-8">
+                <FaFileAlt className="mx-auto text-4xl text-gray-300 mb-2" />
+                <Typography variant="body1" className="text-gray-500">
+                  {searchQuery ? "No matching documents found" : "No documents uploaded yet"}
+                </Typography>
+              </div>
+            )}
+          </div>
+        </AnimateOnScrollProvider>
       )}
-    </div>
-  </AnimateOnScrollProvider>
-)}
-  
 
       <Menu
         anchorEl={anchorEl}
@@ -903,7 +850,7 @@ if (isSubscriber && tier !== 'Basic') {
           <Delete className="mr-2" /> Delete
         </MenuItem>
       </Menu>
-       {open && (
+      {open && (
         <SubscriptionPopup roleId={roleId} onClose={() => setOpen(false)} />
       )}
     </div>
@@ -911,6 +858,927 @@ if (isSubscriber && tier !== 'Basic') {
 };
 
 export default ActionButtons;
+
+
+
+
+
+
+
+
+// "use client";
+// import React, { JSX, useState, useEffect, useRef } from "react";
+// import AnimateOnScrollProvider from "@/sections/components/animation/AnimateOnScrollProvider";
+// import { Snackbar, Alert, Backdrop, CircularProgress } from "@mui/material";
+// import { useRouter } from "next/navigation";
+// import {
+//   FaMobileAlt,
+//   FaHome,
+//   FaEnvelope,
+//   FaBriefcase,
+//   FaFilePdf,
+//   FaFileImage,
+//   FaFileWord,
+//   FaFileExcel,
+//   FaFilePowerpoint,
+//   FaFileArchive,
+//   FaFileAlt,
+//   FaFileCode,
+//   FaFileAudio,
+//   FaFileVideo,
+//   FaDownload,
+//   FaSearch,
+//   FaSpinner,
+//   FaPlus,
+//   FaTrash,
+// } from "react-icons/fa";
+// import {
+//   TextField,
+//   Button,
+//   Chip,
+//   Divider,
+//   IconButton,
+//   Tooltip,
+//   Menu,
+//   MenuItem,
+//   InputAdornment,
+//   Badge,
+//   Avatar,
+//   Typography,
+// } from "@mui/material";
+// import { Delete, MoreVert, FileUpload, CloudDownload } from "@mui/icons-material";
+// import { uploadToS3 } from "@/utils/s3file";
+// import axios from 'axios';
+// import SubscriptionPopup from "@/sections/components/Subscription-plan-popup/SubscriptionPopup";
+// import SubscriptionBox from "./components/SubscriptionBox";
+// import { API_URL } from "@/utils/path";
+//  // adjust path as needed
+
+ 
+// interface SubscriptionDetails {
+//   status: string;
+//   startDate: string;
+//   endDate: string;
+//   nextInvoiceAmount: string;
+//   stripeProductName: string;
+//   tierName: string;
+// }
+
+// interface PaymentMethod {
+//   card: {
+//     brand: string;
+//     last4: string;
+//     exp_month: number;
+//     exp_year: number;
+//   };
+//   billing_details: {
+//     name: string;
+//     email: string;
+//     address: {
+//       country: string | null;
+//     };
+//   };
+// }
+
+// interface Document {
+//   id?: string;
+//   url: string; // Permanent S3 URL
+//   signedUrl: string; // GET pre-signed URL for metadata
+//   name: string;
+//   type: string;
+//   size: string;
+//   uploadedAt: string;
+//   loading?: boolean;
+//   status?: string;
+// }
+
+// interface ActionButtonsProps {
+//   loginData: any;
+//   roleId: number;
+//   updateProfile: (updatedData: any) => void;
+//   refreshUserData: () => Promise<void>;
+// }
+
+// const fileTypeIcons: Record<string, JSX.Element> = {
+//   pdf: <FaFilePdf className="text-red-500" />,
+//   jpg: <FaFileImage className="text-green-500" />,
+//   jpeg: <FaFileImage className="text-green-500" />,
+//   png: <FaFileImage className="text-green-500" />,
+//   gif: <FaFileImage className="text-green-500" />,
+//   doc: <FaFileWord className="text-blue-500" />,
+//   docx: <FaFileWord className="text-blue-500" />,
+//   xls: <FaFileExcel className="text-green-600" />,
+//   xlsx: <FaFileExcel className="text-green-600" />,
+//   ppt: <FaFilePowerpoint className="text-orange-500" />,
+//   pptx: <FaFilePowerpoint className="text-orange-500" />,
+//   zip: <FaFileArchive className="text-yellow-500" />,
+//   rar: <FaFileArchive className="text-yellow-500" />,
+//   txt: <FaFileAlt className="text-gray-500" />,
+//   csv: <FaFileCode className="text-blue-300" />,
+//   json: <FaFileCode className="text-yellow-300" />,
+//   mp3: <FaFileAudio className="text-purple-500" />,
+//   wav: <FaFileAudio className="text-purple-500" />,
+//   mp4: <FaFileVideo className="text-red-400" />,
+//   mov: <FaFileVideo className="text-red-400" />,
+// };
+
+// const ActionButtons: React.FC<ActionButtonsProps> = ({
+//   loginData,
+//   roleId,
+//   updateProfile,
+//   refreshUserData
+// }) => {
+//   const router = useRouter();
+
+//   const [isEditing, setIsEditing] = useState(false);
+//   const [open, setOpen] = useState(false);
+//   const [formData, setFormData] = useState({ ...loginData });
+//   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+//   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+//   const [documents, setDocuments] = useState<Document[]>([]);
+//   const [loadingDocuments, setLoadingDocuments] = useState(true);
+//   const [loading, setLoading] = useState(false);
+//   const [deletingId, setDeletingId] = useState<string | null>(null);
+//   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+//   const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails | null>(null);
+//   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+
+//   const [error, setError] = useState<string | null>(null);
+//   const shouldShowDocuments = roleId === 3;
+//   const inputRef = useRef<HTMLInputElement | null>(null);
+
+//   const handleClick = () => {
+//     inputRef.current?.click(); // open file dialog
+//   };
+//  useEffect(() => {
+//     const fetchSubscriptionDetails = async () => {
+//       try {
+//         const token = localStorage.getItem('authToken')?.replace(/^"|"$/g, '');
+
+//         const response = await axios.get(
+//           `${API_URL}/stripe/get-subscription-details?userId=${loginData?.id || loginData?.userId || 1}`,
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           }
+//         );
+
+//         const { success, result, message } = response.data;
+
+//         if (success) {
+//           setSubscriptionDetails(result.subscriptionDetails);
+//           setPaymentMethod(result.paymentMethod);
+//         } else {
+//           throw new Error(message || 'Failed to fetch subscription');
+//         }
+//       } catch (err: any) {
+//         setError(err.message || 'Something went wrong');
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchSubscriptionDetails();
+//   }, []);
+
+// const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
+//   const file = e.target.files?.[0];
+//   if (!file) return;
+
+//   setLoading(true);
+//   try {
+//     const { fileUrl, signedUrl } = await uploadToS3({ file });
+//     if (!fileUrl || typeof fileUrl !== "string" || !fileUrl.startsWith("http")) {
+//       throw new Error("Invalid S3 URL returned");
+//     }
+
+//     const dbRes = await fetch(`${API_URL}/document/upload`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//       body: JSON.stringify({
+//         url: fileUrl,
+//         key: fileUrl.split("/").pop(), // Store S3 key
+//         userId: loginData?.id || loginData?.userId || 1,
+//       }),
+//     });
+
+//     const dbResult = await dbRes.json();
+//     if (!dbRes.ok) {
+//       throw new Error("DB Save Failed: " + dbResult.message);
+//     }
+
+//     console.log("GET signedUrl:", signedUrl, "Timestamp:", new Date().toISOString());
+//     const newDoc = await fetchDocumentDetails(signedUrl); // Use GET signed URL
+//     setDocuments((prev) => [...prev, { ...newDoc, id: dbResult.id }]);
+//     await refreshUserData();
+//     setSnackbar({ open: true, message: "Document uploaded successfully!", severity: "success" });
+//   } catch (err) {
+//     console.error("Upload Error:", err);
+//     setSnackbar({ open: true, message: "Document upload failed.", severity: "error" });
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+// useEffect(() => {
+//   const loadDocuments = async () => {
+//     const rawDocuments = loginData?.individualProfessional?.documents || [];
+//     setLoadingDocuments(true);
+//     const initialDocuments = rawDocuments.map((doc: any) => ({
+//       id: doc.id,
+//       url: doc.url,
+//       signedUrl: doc.url, // Temporary placeholder
+//       name: decodeURIComponent(doc.url?.split("/").pop() || "Document"),
+//       type: doc.url?.split(".").pop()?.toUpperCase() || "FILE",
+//       size: "Loading...",
+//       uploadedAt: doc.uploadedAt,
+//       status: doc.status,
+//       loading: true,
+//     }));
+//     setDocuments(initialDocuments);
+
+//     try {
+//       const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, "");
+//       const response = await fetch(`${API_URL}/document/generate-presigned-urls`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify({ documentIds: rawDocuments.map((doc: any) => doc.id) }),
+//       });
+//       const { urls } = await response.json();
+//       if (!response.ok) {
+//         throw new Error("Failed to fetch pre-signed URLs");
+//       }
+
+//       console.log("Pre-signed URLs:", urls);
+//       const detailedDocuments = await Promise.all(
+//         urls.map((item: { signedUrl: string }) => fetchDocumentDetails(item.signedUrl))
+//       );
+//       const mergedDocuments = initialDocuments.map((doc: { id: string; url: string }) => {
+//         const detail = detailedDocuments.find((d) => d.url === doc.url);
+//         return detail ? { ...doc, ...detail, id: doc.id, loading: false } : doc;
+//       });
+//       setDocuments(mergedDocuments);
+//     } catch (err) {
+//       console.error("Error loading document details:", err);
+//     } finally {
+//       setLoadingDocuments(false);
+//     }
+//   };
+//   if (loginData?.individualProfessional?.documents) {
+//     loadDocuments();
+//   }
+// }, [loginData]);
+  
+//   const fetchDocumentDetails = async (signedUrl: string): Promise<Document> => {
+//     try {
+//       console.log("Fetching details for:", signedUrl);
+//       const response = await fetch(signedUrl, { method: "HEAD" });
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+  
+//       const contentLength = response.headers.get("content-length");
+//       const lastModified = response.headers.get("last-modified");
+//       const fileName = decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document");
+//       const fileType = fileName.split(".").pop()?.toUpperCase() || "FILE";
+  
+//       return {
+//         url: signedUrl.split("?")[0], // Permanent URL
+//         signedUrl, // GET signed URL
+//         name: fileName,
+//         type: fileType,
+//         size: contentLength ? formatFileSize(parseInt(contentLength)) : "Unknown",
+//         uploadedAt: lastModified ? new Date(lastModified).toLocaleDateString() : "Unknown date",
+//         loading: false,
+//       };
+//     } catch (error) {
+//       console.error(`Error fetching document details for ${signedUrl}:`, error);
+//       return {
+//         url: signedUrl.split("?")[0],
+//         signedUrl,
+//         name: decodeURIComponent(signedUrl.split("/").pop()?.split("?")[0] || "Document"),
+//         type: signedUrl.split(".").pop()?.split("?")[0]?.toUpperCase() || "FILE",
+//         size: "Unknown",
+//         uploadedAt: "Unknown date",
+//         loading: false,
+//       };
+//     }
+//   };
+//   const formatFileSize = (bytes: number): string => {
+//     if (bytes === 0) return '0 Bytes';
+//     const k = 1024;
+//     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+//     const i = Math.floor(Math.log(bytes) / Math.log(k));
+//     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+//   };
+
+//   useEffect(() => {
+//     const loadDocuments = async () => {
+//       const rawDocuments = loginData?.individualProfessional?.documents || [];
+//       setLoadingDocuments(true);
+  
+//       const initialDocuments = rawDocuments.map((doc: any) => ({
+//         id: doc.id,
+//         url: doc.url,
+//         name: decodeURIComponent(doc.url?.split('/').pop() || 'Document'),
+//         type: doc.url?.split('.').pop()?.toUpperCase() || 'FILE',
+//         size: 'Loading...',
+//         uploadedAt: doc.uploadedAt,
+//         status: doc.status,
+//         loading: true,
+//       }));
+  
+//       setDocuments(initialDocuments);
+  
+//       try {
+//         const detailedDocuments = await Promise.all(
+//           rawDocuments.map((doc: any) => fetchDocumentDetails(doc.url))
+//         );
+  
+//         const mergedDocuments = initialDocuments.map((doc: { url: any; }) => {
+//           const detail = detailedDocuments.find(d => d.url === doc.url);
+//           return detail
+//             ? {
+//                 ...doc,
+//                 ...detail,
+//                 loading: false,
+//               }
+//             : doc;
+//         });
+  
+//         setDocuments(mergedDocuments);
+//       } catch (err) {
+//         console.error("Error loading document details:", err);
+//       } finally {
+//         setLoadingDocuments(false);
+//       }
+//     };
+  
+//     if (loginData?.individualProfessional?.documents) {
+//       loadDocuments();
+//     }
+//   }, [loginData]);
+
+//   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, doc: Document) => {
+//     setAnchorEl(event.currentTarget);
+//     setSelectedDoc(doc);
+//   };
+
+//   const handleMenuClose = () => {
+//     setAnchorEl(null);
+//     setSelectedDoc(null);
+//   };
+
+//   const handleDeleteDocument = async (docId?: string) => {
+//     if (!docId) return;
+    
+//     setDeletingId(docId);
+//     const token = localStorage.getItem("authToken")?.replace(/^"|"$/g, '');
+    
+//     try {
+//       const response = await fetch(`${API_URL}/document/${docId}`, {
+//         method: 'DELETE',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to delete document');
+//       }
+
+//       setDocuments(prev => prev.filter(doc => doc.id !== docId));
+//       await refreshUserData();
+//       setSnackbar({ open: true, message: 'Document deleted successfully!', severity: 'success' });
+//     } catch (error) {
+//       console.error('Error deleting document:', error);
+//       setSnackbar({ open: true, message: 'Failed to delete document', severity: 'error' });
+//     } finally {
+//       setDeletingId(null);
+//       handleMenuClose();
+//     }
+//   };
+
+//   const handleDelete = () => {
+//     if (selectedDoc?.id) {
+//       handleDeleteDocument(selectedDoc.id);
+//     }
+//   };
+
+//   const handleDownload = () => {
+//     if (selectedDoc) window.open(selectedDoc.url, "_blank");
+//     handleMenuClose();
+//   };
+
+//   const filteredDocuments = documents.filter(doc =>
+//     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//     doc.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//     (doc.status?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+//   );
+
+//   const documentGroups = filteredDocuments.reduce((groups: Record<string, Document[]>, doc) => {
+//     const type = doc.type;
+//     if (!groups[type]) groups[type] = [];
+//     groups[type].push(doc);
+//     return groups;
+//   }, {});
+
+// const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const { name, value } = e.target;
+//   setFormData((prev: any) => ({
+//     ...prev,
+//     [name]: value,
+//   }));
+// };
+
+
+// const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const file = e.target.files?.[0];
+//   if (!file) return;
+
+//   // Show preview immediately
+//   const imageUrl = URL.createObjectURL(file);
+//   setProfilePhoto(imageUrl);
+// setLoading(true);
+//   try {
+//     // Upload to S3
+//     const {fileUrl, signedUrl} = await uploadToS3({ file });
+//     console.log(fileUrl)
+//     // Store uploaded file URL in formData
+//     if(fileUrl){
+//     setFormData((prev: any) => ({
+//       ...prev,
+//       profile: fileUrl, // store S3 URL, not the file itself
+//     }));
+  
+//   }
+//   } catch (err) {
+//     console.error('Image upload failed:', err);
+//      setLoading(false);
+//     alert('Failed to upload image. Please try again.');
+//   }
+//     setLoading(false);
+//   console.log(formData);
+// };
+// const isSubscriber = loginData?.isSubscriber;
+// const tier = loginData?.subscriptionTier;
+
+// let ringClass = '';
+// if (isSubscriber && tier !== 'Basic') {
+//   if (tier === 'Standard') ringClass = 'ring-6 ring-gray-400'; // silver
+//   else if (tier === 'Premium') ringClass = 'ring-6 ring-yellow-500'; // gold
+// }
+
+
+//   const handleSubmit = () => {
+//     updateProfile(formData);
+//     setIsEditing(false);
+//   };
+
+//   const handleCancel = () => {
+//     setFormData({ ...loginData });
+//     setIsEditing(false);
+//   };
+
+//   const profileData = loginData.profile|| loginData?.individualProfessional?.profile?.profilePhoto || '';
+//   const finalImage = profilePhoto || profileData || "/images/profile.png";
+  
+//   return (
+//     <div className="w-full max-w-5xl mx-auto p-4 space-y-6">
+//       <div className="flex flex-col items-center md:flex-row md:items-center md:space-x-6">
+//         <div className="relative w-28 h-28 rounded-full shadow-lg shadow-gray-400 hover:scale-105 transition-transform duration-300">
+//          <img
+//   src={finalImage}
+//   alt="Profile"
+//   className={`w-full h-full object-cover rounded-full ${ringClass}`}
+// />
+
+//           {isEditing && (
+//             <>
+//               <input
+//                 id="profilePhoto"
+//                 type="file"
+//                 accept="image/*"
+//                 name="profile"
+//                 onChange={handleImageChange}
+//                 className="hidden"
+//               />
+//               <label
+//                 htmlFor="profilePhoto"
+//                 className="absolute bottom-0 left-0 right-0 text-center bg-black bg-opacity-70 text-white text-xs py-1 cursor-pointer rounded-b-lg hover:bg-opacity-90 transition"
+//               >
+//                 Upload Image
+//               </label>
+//             </>
+//           )}
+//         </div>
+
+//         <div className="text-center md:text-left mt-4 md:mt-0 space-y-1">
+//           <h2 className="text-2xl font-semibold text-gray-800">
+//             {formData?.firstName || formData?.lastName
+//               ? `${formData.firstName} ${formData.lastName}`
+//               : "Mr. Y"}
+//           </h2>
+//           <h2 className="text-xl text-gray-600">{formData?.screenName ?? "Mr."}</h2>
+//           {roleId === 3 ? ( <p className="text-gray-500">
+            
+//             {"Security Professional"}</p>):(
+          
+//           <p className="text-gray-500">
+            
+//             {loginData?.role?.name ?? loginData?.role ?? "Security Officer"}
+//           </p>
+//             )}
+//           {/* <span className="text-sm text-yellow-500"> */}
+//             {/* ✅ Usually responds within 1 hour */}
+//           {/* </span> */}
+//         </div>
+//       </div>
+
+//       <div className="flex flex-wrap mt-6 gap-4">
+//         <div className="w-full md:w-[48%]">
+//           <TextField
+//             label="First Name"
+//             name="firstName"
+//             value={formData.firstName || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+//         <div className="w-full md:w-[48%]">
+//           <TextField
+//             label="Last Name"
+//             name="lastName"
+//             value={formData.lastName || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+
+//         <div className="w-full">
+//           <TextField
+//             label="Screen Name"
+//             name="screenName"
+//             value={formData.screenName || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+
+//         <div className="w-full md:w-[48%]">
+//           <TextField
+//             label="Email"
+//             name="email"
+//             value={formData.email || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+//         <div className="w-full md:w-[48%]">
+//           <TextField
+//             label="Phone Number"
+//             name="phoneNumber"
+//             value={formData.phoneNumber || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+
+//         <div className="w-full">
+//           <TextField
+//             label="Address"
+//             name="address"
+//             value={formData.address || ""}
+//             onChange={handleInputChange}
+//             disabled={!isEditing}
+//             fullWidth
+//             size="small"
+//           />
+//         </div>
+//       </div>
+
+//       <div className="mt-3 flex flex-col md:flex-row">
+//         {isEditing ? (
+//           <>
+//             <Button
+//               variant="contained"
+//               color="primary"
+//               onClick={handleSubmit}
+//               fullWidth
+//               sx={{ bgcolor: "black", ":hover": { bgcolor: "#333" } }}
+//             >
+//               Save Profile
+//             </Button>
+//             <Button
+//               variant="outlined"
+//               onClick={handleCancel}
+//               fullWidth
+//               sx={{ color: "black", borderColor: "black" }}
+//             >
+//               Back
+//             </Button>
+//           </>
+//         ) : (
+//           <Button
+//             onClick={() => setIsEditing(true)}
+//             fullWidth
+//             variant="contained"
+//             sx={{ bgcolor: "black", ":hover": { bgcolor: "#333" } }}
+//           >
+//             Update Profile
+//           </Button>
+//         )}
+//       </div>
+
+//       {/* Upgrade Button */}
+//       {!isEditing &&  !loginData.isSubscriber &&(
+//         <></>
+//         // <Button
+//         //   fullWidth
+//         //    onClick={() => setOpen(true)}
+//         //   variant="contained"
+//         //   sx={{ bgcolor: "#f97316", ":hover": { bgcolor: "#ea580c" } }}
+//         // >
+//         //   Upgrade My Membership
+//         // </Button>
+//       )}
+//              {loginData.isSubscriber && (
+    
+//       <SubscriptionBox
+//         subscriptionDetails={
+//           subscriptionDetails ?? {
+//             status: "",
+//             startDate: "",
+//             endDate: "",
+//             nextInvoiceAmount: "",
+//             stripeProductName: "",
+//             tierName: ""
+//           }
+//         }
+//         paymentMethod={
+//           paymentMethod ?? {
+//             card: {
+//               brand: "",
+//               last4: "",
+//               exp_month: 0,
+//               exp_year: 0,
+//             },
+//             billing_details: {
+//               name: "",
+//               email: "",
+//               address: {
+//                 country: null,
+//               },
+//             },
+//           }
+//         }
+//       />
+ 
+//           )}
+
+//       {/* Documents Section Block */}
+
+//       {shouldShowDocuments && (
+//   <AnimateOnScrollProvider>
+//     <div className="space-y-6 mt-5">
+//       <Divider className="my-4">
+//         <Chip
+//           label={
+//             <div className="flex items-center space-x-2">
+//               <CloudDownload />
+//               <span>My Documents ({documents.length})</span>
+//             </div>
+//           }
+//           color="primary"
+//         />
+//       </Divider>
+//       <div className="flex flex-col md:flex-row justify-between gap-4 mt-3">
+//         <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+//           <TextField
+//             size="small"
+//             placeholder="Search documents..."
+//             value={searchQuery}
+//             onChange={(e) => setSearchQuery(e.target.value)}
+//             InputProps={{
+//               startAdornment: (
+//                 <InputAdornment position="start">
+//                   <FaSearch className="text-gray-400" />
+//                 </InputAdornment>
+//               ),
+//             }}
+//             sx={{ flex: 1, maxWidth: { xs: "100%", sm: 400 } }}
+//           />
+//           <>
+//             <input
+//               type="file"
+//               accept="*/*"
+//               ref={inputRef}
+//               onChange={handleFileChange}
+//               style={{ display: "none" }}
+//             />
+//             <Button
+//               variant="contained"
+//               startIcon={<FaPlus />}
+//               onClick={handleClick}
+//               sx={{
+//                 bgcolor: "primary.main",
+//                 whiteSpace: "nowrap",
+//                 minWidth: "fit-content",
+//                 width: { xs: "100%", sm: "auto" },
+//               }}
+//             >
+//               Add Documents
+//             </Button>
+//             <Backdrop open={loading} sx={{ zIndex: 9999, color: "#fff" }}>
+//               <CircularProgress color="inherit" />
+//             </Backdrop>
+//             <Snackbar
+//               open={snackbar.open}
+//               autoHideDuration={4000}
+//               onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+//               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+//             >
+//               <Alert
+//                 onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+//                 severity={snackbar.severity}
+//                 sx={{ width: "100%" }}
+//               >
+//                 {snackbar.message}
+//               </Alert>
+//             </Snackbar>
+//           </>
+//         </div>
+//       </div>
+
+//       {loadingDocuments && (
+//         <div className="flex justify-center items-center py-8">
+//           <FaSpinner className="animate-spin text-2xl text-gray-400 mr-2" />
+//           <Typography variant="body1" className="text-gray-500">
+//             Loading documents...
+//           </Typography>
+//         </div>
+//       )}
+
+//       {!loadingDocuments &&
+//         Object.entries(documentGroups).map(([type, docs]) => (
+//           <div key={type} className="space-y-6">
+//             <div className="flex justify-between items-center px-2">
+//               <Typography variant="h6" className="font-semibold text-gray-700">
+//                 {type} Files ({docs.length})
+//               </Typography>
+//               <Typography variant="body2" className="text-gray-500">
+//                 {docs.length} items
+//               </Typography>
+//             </div>
+
+//             <div className="space-y-4">
+//               {docs.map((doc, index) => {
+//                 const docName = doc.name.split("-").slice(1).join(" ").replace(/\.[^/.]+$/, "");
+//                 const chipStyles =
+//                   doc.status === "PENDING"
+//                     ? { color: "#D97706", bgcolor: "#FEF3C7" }
+//                     : doc.status === "APPROVED"
+//                     ? { color: "#16A34A", bgcolor: "#DCFCE7" }
+//                     : doc.status === "REJECTED"
+//                     ? { color: "#DC2626", bgcolor: "#FEE2E2" }
+//                     : { color: "#6B7280", bgcolor: "#F3F4F6" };
+
+//                 return (
+//                   <div
+//                     key={index}
+//                     className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white border border-gray-300 rounded-lg shadow-sm transition-all duration-200 max-w-full overflow-hidden"
+//                     data-aos="fade-up"
+//                   >
+//                     <div className="flex items-center gap-3 min-w-0 flex-1">
+//                       <Avatar className="w-10 h-10 bg-gray-200 flex-shrink-0">
+//                         {fileTypeIcons[doc.type.toLowerCase()] || <FaFileAlt className="text-gray-600" />}
+//                       </Avatar>
+//                       <div className="flex flex-col min-w-0 flex-1">
+//                         <Typography
+//                           variant="subtitle1"
+//                           className="font-medium text-gray-800 truncate"
+//                           title={docName} // Show full name on hover
+//                         >
+//                           {docName}
+//                         </Typography>
+//                         <Typography variant="body2" className="text-gray-500 truncate">
+//                           {doc.loading ? (
+//                             <span className="flex items-center">
+//                               <FaSpinner className="animate-spin mr-1" size={12} />
+//                               Loading details...
+//                             </span>
+//                           ) : (
+//                             <>
+//                               {doc.size} • {doc.uploadedAt}
+//                             </>
+//                           )}
+//                         </Typography>
+//                       </div>
+//                     </div>
+//                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 pt-2 sm:pt-0">
+//                       {!doc.loading && (
+//                         <Chip
+//                           size="small"
+//                           label={doc.status || "UNKNOWN"}
+//                           sx={{
+//                             fontWeight: "bold",
+//                             borderRadius: "12px",
+//                             padding: "2px 8px",
+//                             ...chipStyles,
+//                             minWidth: "80px",
+//                           }}
+//                         />
+//                       )}
+//                       <Tooltip title="Download">
+//                         <IconButton
+//                           size="small"
+//                           onClick={() => window.open(doc.signedUrl, "_blank")} // Use signedUrl
+//                           sx={{
+//                             color: "primary.main",
+//                             "&:hover": { color: "blue.500" },
+//                           }}
+//                         >
+//                           <FaDownload />
+//                         </IconButton>
+//                       </Tooltip>
+//                       <Tooltip title="Delete">
+//                         <IconButton
+//                           size="small"
+//                           onClick={() => doc.id && handleDeleteDocument(doc.id)}
+//                           disabled={deletingId === doc.id}
+//                           sx={{
+//                             color: deletingId === doc.id ? "gray.500" : "red.500",
+//                             "&:hover": {
+//                               color: deletingId === doc.id ? "gray.500" : "red.700",
+//                               backgroundColor: deletingId === doc.id ? "transparent" : "rgba(255, 0, 0, 0.08)",
+//                             },
+//                           }}
+//                         >
+//                           {deletingId === doc.id ? <FaSpinner className="animate-spin" /> : <FaTrash />}
+//                         </IconButton>
+//                       </Tooltip>
+//                     </div>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           </div>
+//         ))}
+
+//       {!loadingDocuments && filteredDocuments.length === 0 && (
+//         <div className="text-center py-8">
+//           <FaFileAlt className="mx-auto text-4xl text-gray-300 mb-2" />
+//           <Typography variant="body1" className="text-gray-500">
+//             {searchQuery ? "No matching documents found" : "No documents uploaded yet"}
+//           </Typography>
+//         </div>
+//       )}
+//     </div>
+//   </AnimateOnScrollProvider>
+// )}
+  
+
+//       <Menu
+//         anchorEl={anchorEl}
+//         open={Boolean(anchorEl)}
+//         onClose={handleMenuClose}
+//       >
+//         <MenuItem onClick={handleDownload}>
+//           <FaDownload className="mr-2" /> Download
+//         </MenuItem>
+//         <MenuItem onClick={handleDelete}>
+//           <Delete className="mr-2" /> Delete
+//         </MenuItem>
+//       </Menu>
+//        {open && (
+//         <SubscriptionPopup roleId={roleId} onClose={() => setOpen(false)} />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ActionButtons;
 
 
 
