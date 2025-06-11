@@ -294,12 +294,12 @@ const ProfessionalCard = ({ professional }: { professional: Professional }) => {
 
           <div className="grid md:grid-cols-[1fr_auto] gap-4 mt-6 items-start">
             <div className="flex flex-col gap-2">
-              {professional?.individualProfessional?.user?.address && (
+              {/* {professional?.individualProfessional?.user?.address && (
                 <p className={`text-sm text-gray-400 flex items-center gap-1 ${token ? "" : "blur-sm"}`}>
                   <LocationIcon />
                   {professional.individualProfessional.user.address}
                 </p>
-              )}
+              )} */}
               <div className="flex items-center gap-4">
                 <span className={`text-lg font-bold text-gray-900 ${token ? "" : "blur-sm"}`}>
                   {getHourlyRate()}
