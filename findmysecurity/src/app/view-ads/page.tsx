@@ -20,9 +20,9 @@ import { ArrowLeft } from "lucide-react";
 import { Fragment } from 'react';
 import { Dialog } from '@headlessui/react';
 
-const DEFAULT_KEYWORD = "Security Guard";
-const DEFAULT_LOCATION = "London";
-const DEFAULT_RATE = 30000;
+const DEFAULT_KEYWORD = "Security";
+const DEFAULT_LOCATION = "";
+const DEFAULT_RATE = null;
 
 const PostAdLister: React.FC = () => {
   const router = useRouter();
