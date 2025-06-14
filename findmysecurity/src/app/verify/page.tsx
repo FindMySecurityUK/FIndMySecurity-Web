@@ -16,7 +16,7 @@ const page = () => {
   useEffect(() => {
     const lastResendTime = localStorage.getItem('lastResendTime');
     if (lastResendTime) {
-      const timeLeft = 180000 - (Date.now() - parseInt(lastResendTime));
+      const timeLeft = 120000 - (Date.now() - parseInt(lastResendTime));
       if (timeLeft > 0) {
         setCooldownTime(Math.ceil(timeLeft / 1000));
       }
@@ -46,7 +46,7 @@ const page = () => {
       await axios.post(`${API_URL}/auth/resend-otp`, { email });
       
       localStorage.setItem('lastResendTime', Date.now().toString());
-      setCooldownTime(180);
+      setCooldownTime(120);
       toast.success("OTP has been resent to your email.");
     } catch (err) {
       toast.error("Failed to resend OTP. Please try again later.");
@@ -58,7 +58,7 @@ const page = () => {
     <div>
       <Dialog
         open={showVerificationModal}
-        onClose={() => setShowVerificationModal(false)}
+        onClose={() => {}}
         className="fixed z-50 inset-0 overflow-y-auto bg-blue-500 bg-opacity-50 backdrop-blur-sm"
       >
         <div className="flex items-center justify-center min-h-screen px-4">
@@ -66,6 +66,9 @@ const page = () => {
             <Dialog.Title className="text-lg font-bold text-center mb-4">
               Enter Verification Code
             </Dialog.Title>
+            <p className="text-sm text-gray-600 mb-4 italic text-center px-4">
+              Note: If you don't see this email in your inbox, please check your Spam, Junk, or Promotions folder.
+            </p>
             <input
               type="text"
               value={verificationCode}
