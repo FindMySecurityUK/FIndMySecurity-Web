@@ -16,14 +16,26 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const storedData = localStorage.getItem("authToken");
     if (storedData) {
       setProfileData(JSON.parse(storedData)); // Parse JSON data
     }
+    
     function handleClickOutside(event: MouseEvent) {
+      // Handle dropdown click outside
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpenDropdown("");
+      }
+      
+      // Handle mobile menu click outside
+      if (mobileMenuOpen && 
+          mobileMenuRef.current && 
+          !mobileMenuRef.current.contains(event.target as Node) &&
+          !(event.target as Element).closest('button')?.onclick?.toString().includes('setMobileMenuOpen')) {
+        setMobileMenuOpen(false);
       }
     }
 
@@ -31,8 +43,7 @@ export default function Navbar() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-
-  });
+  }, [mobileMenuOpen]); // Add mobileMenuOpen to dependency array
   const handleLogout = () => {
     localStorage.removeItem("loginData"); // Remove user session
     localStorage.removeItem("profileData"); // Remove user session
@@ -141,7 +152,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div 
-        
+        ref={mobileMenuRef}
         className="xl:hidden bg-black text-white p-4 max-h-[90vh] overflow-y-auto"
         // className="md:hidden bg-black text-white p-4"
         >
